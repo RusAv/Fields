@@ -79,7 +79,7 @@ class Point:
 
 class Body:
     def __init__(self):
-        self.points=[-1]*10
+        self.points=0
         self.omega=0
         self.acc=0
         self.eps=0
@@ -87,9 +87,11 @@ class Body:
         self.I=0
         self.center=0
 
-    def append(self,p , i):
-        self.points[i]=p
+    def append(self,p):
+        self.points.append(p)
 
+    def delete(self,p):
+        self.points.remove(p)
 
     def delete(self,i):
         self.points[i]=-1
@@ -118,16 +120,16 @@ class Body:
         F=Vector(*[0 for i in range(len(self.points[0]))])
         for p in Forces:
             F+=p
-        return p
+        return F
 
+    def calc_momentum(self,Forces):
+        #момент вычисляется сначала векторно чтобы избежать путаницы со знаками
+        momentum=Vector(*[0 for i in range(3)])
+        self.center=self.calc_center()
+        for i in range(len(Forces)):
+            momentum=momentum+(self.points[i].coords-self.center)/ (Forces[i])
+        return abs(momentum)
 
-    def move(self,dt):
-        # сначала передвигаем все точки на вектор скорости центра масс
-        for p in self.points:
-            p.move(dt)
-        #затем поворачиваем конструкцию
-        for p in self.points:
-            pass
 
 G=100
 K=10**7
@@ -136,38 +138,68 @@ class Field:
         self.points=[]
     def append(self,p):
         self.points.append(p)
-
     def intensity(self,coord,pointis=[]):
 
-        if len(pointis)==0: pointis=[-1]*len(self.points)
         proj = Vector(*[0 for i in range(len(coord))])
-        i=0
         for point in self.points:
-            if type(pointis[i])==int:
+            if point not in pointis:
                 if coord % point.coords < 10 ** (-11):
                     continue
                 proj = proj - (point.coords - coord) * (K * point.q / ((point.coords % coord) ** 3))
                 # print(point.coords-coord)
-            i+=1
         return proj
 
     def Gr_intensity(self, vect, pointis=[]):
-        if len(pointis) == 0: pointis = [-1] * len(self.points)
-        i=0
         inten = Vector(*[0 for i in range(len(vect))])
         for p in self.points:
-            if type(pointis[i]) == int:
+            if p not in pointis:
                 if vect % p.coords < 10 ** (-11):
                     continue
                 inten = inten - (vect - p.coords)*(G * p.mass  / abs(vect - p.coords) ** 3)
-            i+=1
         return inten
 
     def step(self,dt):
         for p in self.points:
+            p.move(dt)
             p.acer(self.intensity(p.coords)*p.q+self.Gr_intensity(p.coords)*p.mass)
             p.accelerate(dt)
-            p.move(dt)
+
+class body_field:
+    def __init__(self):
+         self.bodies=[]
+    def append(self,body):
+         self.bodies.append(body)
+        
+    def initial(self,in_body,field):
+        l=max(in_body)
+        self.bodies=[0 for i in range(l)]
+        for i in range(len(in_body)):
+            self.bodies[in_body[i]].points.append(field.points[i])
+
+    def change_params(self,field,dt):
+        for body in self.bodies:
+            body.I=body.calc_i()
+            forces=[field.intensity(body.points[i].coords,body.points)*body.points[i].q +
+                    field.Gr_intensity(body.points[i].coords,body.points)*body.points[i].mass
+                    for i in range(len(body.points))]
+            body.eps=body.calc_momentum(forces)/body.I
+            body.acc=body.calc_F(forces)
+
+            body.omega+=body.eps*dt
+            body.speed=body.speed+body.acc
+
+    def adjust_points(self):
+        for body in self.bodies:
+            for p in body.points:
+                s=p.coords-body.center
+                p.speed=body.speed+body.omega*abs(s)*(s.perp(body.speed)*(1/abs(s.perp(body.speed))))
+                #Тут стоит некий костыль чтобы определить направление вращательной компоненты скорости мы берем
+                #перпендикулярную проекцию вектора скорости центра масс на радиус вектор точки относ центра масс и делим ее на модуль этого вектора
+                #тем самым получаем единичный вектор, перпендикулярный линии между тоской и цм
+
+    def step(self,field,dt):
+        self.change_params(field,dt)
+        self.adjust_points()
 
 
 
@@ -179,6 +211,9 @@ ax=plt.subplot(111)
 ax.set_xlim(-x_size*10,x_size*10)
 ax.set_ylim(-y_size*10,y_size*10)
 field = Field()
+
+InBody=[-1 for i in range(n)]
+
 print(type(57)==int)
 for i in range(0, n):
     field.append(Point(Vector(randint(-x_size, x_size), randint(-y_size, y_size),0), Vector(0, 0, 0), 10, Vector(0, 0,0 ), 1))
@@ -187,7 +222,7 @@ for i in range(0, n):
 def sigm(x):
     '''
     Отвечает за градиент поля
-    :param x: 
+    :param x:
     :return:
     '''
     return 1 / (1 + 1.0000055 ** (-x))

@@ -55,7 +55,9 @@ class Vector(list):
         for i in range(len(self)):
             r+=self[i]*other[i]
         return r
-
+    def rotated(self,alpha):
+        x,y=self[0],self[1]
+        return Vector(x*np.cos(alpha)-y*np.sin(alpha),x*np.sin(alpha)+y*np.cos(alpha),self[2])
 class Point:
     def __init__(self,coords=Vector(),speed=Vector(),mass=0,acc=None,q=1):
         self.coords=coords
@@ -155,6 +157,9 @@ class Body:
         self.omega += self.eps * dt
         self.speed = self.speed + self.acc*dt
 
+    def move(self,dt):
+        self.center=self.center + self.speed*dt
+
 G=100
 K=10**8
 class Field:
@@ -181,11 +186,14 @@ class Field:
                 inten = inten - (vect - p.coords)*(G * p.mass  / abs(vect - p.coords) ** 3)
         return inten
 
-    def step(self,dt):
-        for p in self.points:
-            p.move(dt)
-            p.acer(self.intensity(p.coords)*p.q+self.Gr_intensity(p.coords)*p.mass)
-            p.accelerate(dt)
+    def step(self,InBody,dt):
+        for i in range(len(self.points)):
+            p=self.points[i]
+            if InBody[i]==-1:
+                p.move(dt)
+                p.acer(self.intensity(p.coords)*p.q+self.Gr_intensity(p.coords)*p.mass)
+                p.accelerate(dt)
+
 
 class body_field:
     def __init__(self):
@@ -205,31 +213,47 @@ class body_field:
             if in_body[i]!=-1 :self.bodies[in_body[i]].points.append(field.points[i])
         for body in self.bodies:
             body.calc_params()
+
+
     def change_params(self,field,dt):
         for body in self.bodies:
-            body.I=body.calc_i()
+            #body.I=body.calc_i()
             forces=[field.intensity(body.points[i].coords,body.points)*body.points[i].q +
                     field.Gr_intensity(body.points[i].coords,body.points)*body.points[i].mass
                     for i in range(len(body.points))]
             #print(forces)
             body.acer(forces)
-            body.accelerate(dt)
 
-    def adjust_points(self):
+
+    def move_points(self,dt):
         for body in self.bodies:
             for p in body.points:
                 s=p.coords-body.center
-                #print(body.speed,'speed')
+                #print(abs(s),"vbh")
+                p.coords=p.coords+body.speed*dt+(s.rotated(5*body.omega*dt)-s)
+               # print(s.perp(Vector(*[1 for i in range(len(p.coords))])) // s,'      ')
+                #  #для того чтобы центр масс тела не сдвигался до того как мы поврне  вокруг него точки
+            body.move(dt)
+            #print(abs(body.points[1].coords-body.center),'______________sfvd')
+
+    def speed_points(self,dt):
+        for body in self.bodies:
+            body.accelerate(dt)
+            for p in body.points:
+                s = p.coords - body.center
+                #print(abs(s))
                 p.speed=body.speed+\
                         s.perp(Vector(*[1 for i in range(len(p.coords))]))*\
                         (body.omega*abs(s)*(1/abs(s.perp(Vector(*[1 for i in range(len(p.coords))])))))
                 #Тут стоит некий костыль чтобы определить направление вращательной компоненты скорости мы берем
                 #перпендикулярную проекцию вектора скорости центра масс на радиус вектор точки относ центра масс и делим ее на модуль этого вектора
                 #тем самым получаем единичный вектор, перпендикулярный линии между тоской и цм
-
+        print()
     def step(self,field,dt):
         self.change_params(field,dt)
-        self.adjust_points()
+        self.move_points(dt)
+        self.speed_points(dt)
+
 
 
 
@@ -263,12 +287,11 @@ def anim(steps):
     global stepik
     print(steps)
     stepik+=1
-    for i in range(900):
-        field.step(0.00001)
-        body_fi.change_params(field,0.00001)
-        body_fi.adjust_points()
-    print(abs(field.points[0].coords-field.points[1].coords))
-    print(abs(field.points[2].coords - field.points[1].coords))
+    for i in range(9):
+        field.step(InBody,0.001)
+        body_fi.step(field,0.001)
+    print(abs(body_fi.bodies[0].points[1].coords - body_fi.bodies[0].center))
+    print(abs(field.points[2].coords - body_fi.bodies[0].center))
     res=[]
     STEP=4
     for x in np.arange(-x_size,x_size,STEP):
@@ -296,3 +319,5 @@ steps=10
 animate=FuncAnimation(fig,anim,interval=50,frames=300,blit=False)
 #animate.save('field3.gif')
 plt.show()
+s1=Vector(1.123457676,2.9786543,0)
+print(abs(s1)-abs(s1.rotated(0.0001)))

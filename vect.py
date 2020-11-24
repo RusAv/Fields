@@ -162,6 +162,7 @@ class Body:
 
 G=100
 K=10**8
+C=5
 class Field:
     def __init__(self):
         self.points=[]
@@ -186,12 +187,21 @@ class Field:
                 inten = inten - (vect - p.coords)*(G * p.mass  / abs(vect - p.coords) ** 3)
         return inten
 
+    def Magnetic_intensity(self, vect, pointis=[]):
+        inten = Vector(*[0 for i in range(len(vect))])
+        for p in self.points:
+            if p not in pointis:
+                if vect % p.coords < 10 ** (-9):
+                    continue
+                inten = inten+(p.speed/(p.coords-vect))*(C/abs(p.coords-vect)**3)
+        return inten
+
     def step(self,InBody,dt):
         for i in range(len(self.points)):
             p=self.points[i]
             if InBody[i]==-1:
                 p.move(dt)
-                p.acer(self.intensity(p.coords)*p.q+self.Gr_intensity(p.coords)*p.mass)
+                p.acer(self.intensity(p.coords)*p.q+self.Gr_intensity(p.coords)*p.mass+(p.speed/self.Magnetic_intensity(p.coords))*p.q)
                 p.accelerate(dt)
 
 
@@ -220,6 +230,7 @@ class body_field:
             #body.I=body.calc_i()
             forces=[field.intensity(body.points[i].coords,body.points)*body.points[i].q +
                     field.Gr_intensity(body.points[i].coords,body.points)*body.points[i].mass
+                    +(body.points[i].speed/field.Magnetic_intensity(body.points[i].coords))*body.points[i].q
                     for i in range(len(body.points))]
             #print(forces)
             body.acer(forces)
@@ -231,8 +242,6 @@ class body_field:
                 s=p.coords-body.center
                 #print(abs(s),"vbh")
                 p.coords=p.coords+body.speed*dt+(s.rotated(5*body.omega*dt)-s)
-               # print(s.perp(Vector(*[1 for i in range(len(p.coords))])) // s,'      ')
-                #  #для того чтобы центр масс тела не сдвигался до того как мы поврне  вокруг него точки
             body.move(dt)
             #print(abs(body.points[1].coords-body.center),'______________sfvd')
 
@@ -257,7 +266,7 @@ class body_field:
 
 
 
-n=4
+n=6
 x_size=80
 y_size=80
 fig=plt.figure()
@@ -265,7 +274,7 @@ ax=plt.subplot(111)
 ax.set_xlim(-x_size*10,x_size*10)
 ax.set_ylim(-y_size*10,y_size*10)
 field = Field()
-InBody=[0,0,0,-1]
+InBody=[0,0,0,1,1,-1]
 stepik=0
 
 print(type(57)==int)
@@ -297,14 +306,13 @@ def anim(steps):
     for x in np.arange(-x_size,x_size,STEP):
         for y in np.arange(-y_size,y_size,STEP):
             #print(x,'  ',y)
-            vec=field.intensity(Vector(x,y,0))
+            vec=field.Gr_intensity(Vector(x,y,0))
             grad=abs(vec)
             vec=vec*(STEP*(1/abs(vec)))
             res.append(([x-vec[0]/2,x+vec[0]/2],[y-vec[1]/2,y+vec[1]/2],grad))
     ax.clear()
     ax.set_xlim(-x_size , x_size )
     ax.set_ylim(-y_size , y_size )
-    #print(res)
     lines=[]
     for r in res:
         lines.append(ax.plot(r[0],r[1],color=(sigm(r[2]),0.1,0.8 * (1 - sigm(r[2])))))
@@ -319,5 +327,3 @@ steps=10
 animate=FuncAnimation(fig,anim,interval=50,frames=300,blit=False)
 #animate.save('field3.gif')
 plt.show()
-s1=Vector(1.123457676,2.9786543,0)
-print(abs(s1)-abs(s1.rotated(0.0001)))

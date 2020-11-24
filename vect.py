@@ -81,6 +81,7 @@ class Point:
 class Body:
     def __init__(self,dim=3):
         self.points=[]
+        self.mass=0
         self.omega=0
         self.acc=Vector(*[0 for i in range(dim)])
         self.eps=Vector(*[0 for i in range(dim)])
@@ -112,9 +113,9 @@ class Body:
     def calc_F(self,Forces):
         #принимает на вход массив
         F=Vector(*[0 for i in range(len(self.points[0].coords))])
-        print(F)
         for p in Forces:
-            F+=p
+            F=F+p
+        #print(F)
         return F
 
     def calc_momentum(self,Forces):
@@ -122,7 +123,7 @@ class Body:
         momentum=Vector(*[0 for i in range(3)])
         self.center=self.calc_center()
         for i in range(len(Forces)):
-            momentum=momentum+(self.points[i].coords-self.center)/ (Forces[i])
+            momentum=momentum-(self.points[i].coords-self.center)/ (Forces[i])
         return abs(momentum)
 
     def calc_params(self):
@@ -135,9 +136,8 @@ class Body:
             mas += p.mass
             energ += p.kinetic_en()
             vel =vel+  p.speed * p.mass
-        print(vel,'vel')
+        self.mass=mas
         self.speed = vel * (1 / mas)
-        print(self.speed,'fdbfd')
         self.omega = (2*(energ - (abs(self.speed)**2) * mas / 2) / self.I)**2
 
     def delete(self,p):
@@ -149,14 +149,15 @@ class Body:
     
     def acer(self,forces):
         self.eps = self.calc_momentum(forces) / self.I
-        self.acc = self.calc_F(forces)
+        self.acc = self.calc_F(forces) *(1 / self.mass)
+        print(self.acc)
     
     def accelerate(self,dt):
         self.omega += self.eps * dt
         self.speed = self.speed + self.acc
 
 G=100
-K=10**7
+K=10**8
 class Field:
     def __init__(self):
         self.points=[]
@@ -219,9 +220,7 @@ class body_field:
         for body in self.bodies:
             for p in body.points:
                 s=p.coords-body.center
-                print(body.speed,'speed')
-                print(s.perp(Vector(*[1 for i in range(len(p.coords))]))*\
-                        (body.omega*abs(s)*(1/abs(s.perp(Vector(*[1 for i in range(len(p.coords))]))))),'suckuty')
+                #print(body.speed,'speed')
                 p.speed=body.speed+\
                         s.perp(Vector(*[1 for i in range(len(p.coords))]))*\
                         (body.omega*abs(s)*(1/abs(s.perp(Vector(*[1 for i in range(len(p.coords))])))))
@@ -236,19 +235,19 @@ class body_field:
 
 
 n=3
-x_size=20
-y_size=20
+x_size=80
+y_size=80
 fig=plt.figure()
 ax=plt.subplot(111)
 ax.set_xlim(-x_size*10,x_size*10)
 ax.set_ylim(-y_size*10,y_size*10)
 field = Field()
 InBody=[0,0,-1]
-
+stepik=0
 
 print(type(57)==int)
 for i in range(0, n):
-    field.append(Point(Vector(randint(-x_size, x_size), randint(-y_size, y_size),0), Vector(0, 0, 0), 10, Vector(0, 0,0 ), 1))
+    field.append(Point(Vector(randint(-x_size/4, x_size/4), randint(-y_size/4, y_size/4),0), Vector(0, 0, 0), 10, Vector(0, 0,0 ), 1))
 body_fi= body_field()
 body_fi.initial(InBody,field)
 
@@ -262,19 +261,26 @@ def sigm(x):
 
 
 def anim(steps):
+    global stepik
     print(steps)
+    stepik+=1
     field1=Field()
+    body_fi1=body_field()
     for i in range(0, n):
         field1.append(field.points[i])
-    for i in range(0, steps):
-        field.step(0.00006)
-        body_fi.change_params(field,0.00006)
-        body_fi.adjust_points()
+    for i in range(0, len(body_fi.bodies)):
+        body_fi1.append(body_fi.bodies[i])
+    for i in range(300):
+        field1.step(0.000006)
+        body_fi1.change_params(field1,0.000006)
+        body_fi1.adjust_points()
+        s=body_fi1.bodies[0]
+    print(abs(s.points[0].coords-s.points[1].coords))
 
     res=[]
-    STEP=1
-    for x in np.arange(-20,20,STEP):
-        for y in np.arange(-20,20,STEP):
+    STEP=4
+    for x in np.arange(-x_size,x_size,STEP):
+        for y in np.arange(-y_size,y_size,STEP):
             vec=field1.intensity(Vector(x,y,0))
             grad=abs(vec)
             vec=vec*(STEP*(1/abs(vec)))
@@ -293,6 +299,7 @@ def anim(steps):
 
 
 steps=10
+#anim(1000)
 animate=FuncAnimation(fig,anim,interval=50,frames=300,blit=False)
 #animate.save('field3.gif')
 plt.show()

@@ -150,11 +150,10 @@ class Body:
     def acer(self,forces):
         self.eps = self.calc_momentum(forces) / self.I
         self.acc = self.calc_F(forces) *(1 / self.mass)
-        print(self.acc)
     
     def accelerate(self,dt):
         self.omega += self.eps * dt
-        self.speed = self.speed + self.acc
+        self.speed = self.speed + self.acc*dt
 
 G=100
 K=10**8
@@ -168,17 +167,16 @@ class Field:
         proj = Vector(*[0 for i in range(len(coord))])
         for point in self.points:
             if point not in pointis:
-                if coord % point.coords < 10 ** (-11):
+                if coord % point.coords < 10 ** (-9):
                     continue
                 proj = proj - (point.coords - coord) * (K * point.q / ((point.coords % coord) ** 3))
-                # print(point.coords-coord)
         return proj
 
     def Gr_intensity(self, vect, pointis=[]):
         inten = Vector(*[0 for i in range(len(vect))])
         for p in self.points:
             if p not in pointis:
-                if vect % p.coords < 10 ** (-11):
+                if vect % p.coords < 10 ** (-9):
                     continue
                 inten = inten - (vect - p.coords)*(G * p.mass  / abs(vect - p.coords) ** 3)
         return inten
@@ -213,6 +211,7 @@ class body_field:
             forces=[field.intensity(body.points[i].coords,body.points)*body.points[i].q +
                     field.Gr_intensity(body.points[i].coords,body.points)*body.points[i].mass
                     for i in range(len(body.points))]
+            #print(forces)
             body.acer(forces)
             body.accelerate(dt)
 
@@ -234,7 +233,7 @@ class body_field:
 
 
 
-n=3
+n=4
 x_size=80
 y_size=80
 fig=plt.figure()
@@ -242,12 +241,12 @@ ax=plt.subplot(111)
 ax.set_xlim(-x_size*10,x_size*10)
 ax.set_ylim(-y_size*10,y_size*10)
 field = Field()
-InBody=[0,0,-1]
+InBody=[0,0,0,-1]
 stepik=0
 
 print(type(57)==int)
 for i in range(0, n):
-    field.append(Point(Vector(randint(-x_size/4, x_size/4), randint(-y_size/4, y_size/4),0), Vector(0, 0, 0), 10, Vector(0, 0,0 ), 1))
+    field.append(Point(Vector(randint(-x_size/2, x_size/2), randint(-y_size/2, y_size/2),0), Vector(0, 0, 0), 10, Vector(0, 0,0 ), 1))
 body_fi= body_field()
 body_fi.initial(InBody,field)
 
@@ -257,31 +256,25 @@ def sigm(x):
     :param x:
     :return:
     '''
-    return 1 / (1 + 1.0000055 ** (-x))
+    return 1 / (1 + 1.000055 ** (-x))
 
 
 def anim(steps):
     global stepik
     print(steps)
     stepik+=1
-    field1=Field()
-    body_fi1=body_field()
-    for i in range(0, n):
-        field1.append(field.points[i])
-    for i in range(0, len(body_fi.bodies)):
-        body_fi1.append(body_fi.bodies[i])
-    for i in range(300):
-        field1.step(0.000006)
-        body_fi1.change_params(field1,0.000006)
-        body_fi1.adjust_points()
-        s=body_fi1.bodies[0]
-    print(abs(s.points[0].coords-s.points[1].coords))
-
+    for i in range(900):
+        field.step(0.00001)
+        body_fi.change_params(field,0.00001)
+        body_fi.adjust_points()
+    print(abs(field.points[0].coords-field.points[1].coords))
+    print(abs(field.points[2].coords - field.points[1].coords))
     res=[]
     STEP=4
     for x in np.arange(-x_size,x_size,STEP):
         for y in np.arange(-y_size,y_size,STEP):
-            vec=field1.intensity(Vector(x,y,0))
+            #print(x,'  ',y)
+            vec=field.intensity(Vector(x,y,0))
             grad=abs(vec)
             vec=vec*(STEP*(1/abs(vec)))
             res.append(([x-vec[0]/2,x+vec[0]/2],[y-vec[1]/2,y+vec[1]/2],grad))

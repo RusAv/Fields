@@ -48,7 +48,7 @@ class Vector(list):
         return r
         #проверить ее надо))
     def perp(self,other):
-        return abs((self/other)/(abs(other)))
+        return (self/other)*(1/abs(other))
 
     def __floordiv__(self, other):
         r=0
@@ -63,14 +63,15 @@ class Point:
         self.mass=mass
         self.acc=acc
         self.q=q
-
+    def kinetic_en(self):
+        return self.mass*abs(self.speed)**2/2
     def move(self,dt):
         self.coords=self.coords+self.speed*dt
         #print(self.speed)
 
     def accelerate(self,dt):
         self.speed=self.speed+self.acc*dt
-        #print(self.acc)
+        #print(self.speed)
 
     def acer(self,Force):
         self.acc=Force*(1/self.mass)
@@ -78,46 +79,40 @@ class Point:
 
 
 class Body:
-    def __init__(self):
-        self.points=0
+    def __init__(self,dim=3):
+        self.points=[]
         self.omega=0
-        self.acc=0
-        self.eps=0
-        self.speed=0
+        self.acc=Vector(*[0 for i in range(dim)])
+        self.eps=Vector(*[0 for i in range(dim)])
+        self.speed=Vector(*[0 for i in range(dim)])
         self.I=0
         self.center=0
 
     def append(self,p):
         self.points.append(p)
 
-    def delete(self,p):
-        self.points.remove(p)
-
-    def delete(self,i):
-        self.points[i]=-1
 
 
     def calc_center(self):
-        center=Vector(*[0 for i in range(len(self.points[0]))])
+        center=Vector(*[0 for i in range(len(self.points[0].coords))])
         sum_mass=0
         for p in self.points:
-            if type(p)!=int:
-                for i in range(len(p)):
-                    center[i]+=p[i]*p.mass
-                sum_mass+=p.mass
+            for i in range(len(p.coords)):
+                center[i]+=p.coords[i]*p.mass
+            sum_mass+=p.mass
         return center*(1/sum_mass)
 
     def calc_i(self):
         I=0
         self.center=self.calc_center()
         for p in self.points:
-            if type(p) != int:
-                I += p.mass * abs(p.coords - self.center) ** 2
+            I += p.mass * abs(p.coords - self.center) ** 2
 
         return I
     def calc_F(self,Forces):
         #принимает на вход массив
-        F=Vector(*[0 for i in range(len(self.points[0]))])
+        F=Vector(*[0 for i in range(len(self.points[0].coords))])
+        print(F)
         for p in Forces:
             F+=p
         return F
@@ -130,6 +125,35 @@ class Body:
             momentum=momentum+(self.points[i].coords-self.center)/ (Forces[i])
         return abs(momentum)
 
+    def calc_params(self):
+        mas = 0
+        energ = 0
+        self.I = self.calc_i()
+        self.center = self.calc_center()
+        vel = Vector(*[0 for i in range(3)])
+        for p in self.points:
+            mas += p.mass
+            energ += p.kinetic_en()
+            vel =vel+  p.speed * p.mass
+        print(vel,'vel')
+        self.speed = vel * (1 / mas)
+        print(self.speed,'fdbfd')
+        self.omega = (2*(energ - (abs(self.speed)**2) * mas / 2) / self.I)**2
+
+    def delete(self,p):
+        '''
+        При удалении точки из тела пересчитываем параметры твердого тела
+        '''
+        self.points.remove(p)
+        self.calc_params()
+    
+    def acer(self,forces):
+        self.eps = self.calc_momentum(forces) / self.I
+        self.acc = self.calc_F(forces)
+    
+    def accelerate(self,dt):
+        self.omega += self.eps * dt
+        self.speed = self.speed + self.acc
 
 G=100
 K=10**7
@@ -169,30 +193,38 @@ class body_field:
          self.bodies=[]
     def append(self,body):
          self.bodies.append(body)
-        
-    def initial(self,in_body,field):
-        l=max(in_body)
-        self.bodies=[0 for i in range(l)]
-        for i in range(len(in_body)):
-            self.bodies[in_body[i]].points.append(field.points[i])
 
+    def initial(self,in_body,field):
+        '''
+        Тут происходит созание поля по массиву в котором каждой точке сопоставлен номер тела, в котором она состоит
+        Также вычисляютсю параметры такого тела
+        Вызов этой функции происходит каждый ра зкогда меняется поле
+        '''
+        l=max(in_body)+1
+        self.bodies=[Body() for i in range(l)]
+        for i in range(len(in_body)):
+            if in_body[i]!=-1 :self.bodies[in_body[i]].points.append(field.points[i])
+        for body in self.bodies:
+            body.calc_params()
     def change_params(self,field,dt):
         for body in self.bodies:
             body.I=body.calc_i()
             forces=[field.intensity(body.points[i].coords,body.points)*body.points[i].q +
                     field.Gr_intensity(body.points[i].coords,body.points)*body.points[i].mass
                     for i in range(len(body.points))]
-            body.eps=body.calc_momentum(forces)/body.I
-            body.acc=body.calc_F(forces)
-
-            body.omega+=body.eps*dt
-            body.speed=body.speed+body.acc
+            body.acer(forces)
+            body.accelerate(dt)
 
     def adjust_points(self):
         for body in self.bodies:
             for p in body.points:
                 s=p.coords-body.center
-                p.speed=body.speed+body.omega*abs(s)*(s.perp(body.speed)*(1/abs(s.perp(body.speed))))
+                print(body.speed,'speed')
+                print(s.perp(Vector(*[1 for i in range(len(p.coords))]))*\
+                        (body.omega*abs(s)*(1/abs(s.perp(Vector(*[1 for i in range(len(p.coords))]))))),'suckuty')
+                p.speed=body.speed+\
+                        s.perp(Vector(*[1 for i in range(len(p.coords))]))*\
+                        (body.omega*abs(s)*(1/abs(s.perp(Vector(*[1 for i in range(len(p.coords))])))))
                 #Тут стоит некий костыль чтобы определить направление вращательной компоненты скорости мы берем
                 #перпендикулярную проекцию вектора скорости центра масс на радиус вектор точки относ центра масс и делим ее на модуль этого вектора
                 #тем самым получаем единичный вектор, перпендикулярный линии между тоской и цм
@@ -203,7 +235,7 @@ class body_field:
 
 
 
-n=7
+n=3
 x_size=20
 y_size=20
 fig=plt.figure()
@@ -211,13 +243,14 @@ ax=plt.subplot(111)
 ax.set_xlim(-x_size*10,x_size*10)
 ax.set_ylim(-y_size*10,y_size*10)
 field = Field()
+InBody=[0,0,-1]
 
-InBody=[-1 for i in range(n)]
 
 print(type(57)==int)
 for i in range(0, n):
     field.append(Point(Vector(randint(-x_size, x_size), randint(-y_size, y_size),0), Vector(0, 0, 0), 10, Vector(0, 0,0 ), 1))
-
+body_fi= body_field()
+body_fi.initial(InBody,field)
 
 def sigm(x):
     '''
@@ -235,7 +268,8 @@ def anim(steps):
         field1.append(field.points[i])
     for i in range(0, steps):
         field.step(0.00006)
-
+        body_fi.change_params(field,0.00006)
+        body_fi.adjust_points()
 
     res=[]
     STEP=1
@@ -243,7 +277,7 @@ def anim(steps):
         for y in np.arange(-20,20,STEP):
             vec=field1.intensity(Vector(x,y,0))
             grad=abs(vec)
-            vec=vec*STEP*(1/abs(vec))
+            vec=vec*(STEP*(1/abs(vec)))
             res.append(([x-vec[0]/2,x+vec[0]/2],[y-vec[1]/2,y+vec[1]/2],grad))
     ax.clear()
     ax.set_xlim(-x_size , x_size )

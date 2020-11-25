@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 from random import *
 import numpy as np
 from matplotlib.animation import *
+
+
 class Vector(list):
     def __init__(self,*el):
         for l in el:
@@ -58,6 +60,8 @@ class Vector(list):
     def rotated(self,alpha):
         x,y=self[0],self[1]
         return Vector(x*np.cos(alpha)-y*np.sin(alpha),x*np.sin(alpha)+y*np.cos(alpha),self[2])
+
+
 class Point:
     def __init__(self,coords=Vector(),speed=Vector(),mass=0,acc=None,q=1):
         self.coords=coords
@@ -160,9 +164,12 @@ class Body:
     def move(self,dt):
         self.center=self.center + self.speed*dt
 
+
 G=100
 K=10**8
 C=5
+
+
 class Field:
     def __init__(self):
         self.points=[]
@@ -235,7 +242,6 @@ class body_field:
             #print(forces)
             body.acer(forces)
 
-
     def move_points(self,dt):
         for body in self.bodies:
             for p in body.points:
@@ -258,12 +264,11 @@ class body_field:
                 #перпендикулярную проекцию вектора скорости центра масс на радиус вектор точки относ центра масс и делим ее на модуль этого вектора
                 #тем самым получаем единичный вектор, перпендикулярный линии между тоской и цм
         print()
+    
     def step(self,field,dt):
         self.change_params(field,dt)
         self.move_points(dt)
         self.speed_points(dt)
-
-
 
 
 n=6
@@ -282,6 +287,7 @@ for i in range(0, n):
     field.append(Point(Vector(randint(-x_size/2, x_size/2), randint(-y_size/2, y_size/2),0), Vector(0, 0, 0), 10, Vector(0, 0,0 ), 1))
 body_fi= body_field()
 body_fi.initial(InBody,field)
+
 
 def sigm(x):
     '''

@@ -5,72 +5,128 @@ from matplotlib.animation import *
 
 
 class Vector(list):
-    def __init__(self,*el):
+    def __init__(self, *el):
         for l in el:
             self.append(l)
 
-    def __add__(self,other):
-        r=Vector()
-        for i in range(len(self)):
-            r.append(self[i] + other[i])
-        return r
+    def __add__(self, other_vector):
+        '''
+        Сложение векторов
+        '''
 
-    def __sub__(self, other):
         r = Vector()
         for i in range(len(self)):
-            r.append(self[i] - other[i])
+            r.append(self[i] + other_vector[i])
+        return r 
+        # NOTE: (to @RusAv) Объясни @valerev почему нельзя складывать просто покомпонентно
+        # Т.е. for i in range(...): self[i] += other_vector[i] 
+        # Я пробовал, и система себя ведёт иначе в сравнении с этим вариантом
+
+    def __sub__(self, other_vector):
+        '''
+        Вычитание векторов
+        '''
+
+        r = Vector()
+        for i in range(len(self)):
+            r.append(self[i] - other_vector[i])
         return r
 
-    def __mod__(self, other):
-        r=0
+    def __mod__(self, other_vector):
+        '''
+        Вычисляет длину вектора-разности self и other_vector
+        '''
+
+        r = 0
         for i in range(len(self)):
-            r+=(self[i]-other[i]) ** 2
+            r += (self[i] - other_vector[i])**2
         return r**0.5
 
-    def __mul__(self, other):
-        r=Vector()
+    def __mul__(self, scalar):
+        '''
+        Умножение вектора на скаляр
+        '''
+
+        r = Vector()
         for i in range(len(self)):
-            r.append(self[i]*other)
+            r.append(self[i]*scalar)
         return r
 
     def __abs__(self):
+        '''
+        Модуль вектора
+        '''
+
         r=0
         for i in range(len(self)):
             r+=self[i]**2
         return r**0.5
 
-    def __truediv__(self, other):
-        ''' Задаем операцию векторного умножения x/y'''
-        r=Vector(*[0 for i in range(len(self))])
+    def __truediv__(self, other_vector):
+        '''
+        Задаем операцию векторного умножения x на y
+        Задаётся выражением "x/y"
+        '''
+
+        r = Vector(*[0 for i in range(len(self))])
         for i in range(len(self)):
-            if i!=len(self)-2 : r[(i+2)%len(self)]=(-1)**i*(self[i] * other[(i+1) % len(self)]
-                                        -self[(i+1) % len(self)] * other[i])
-            else: r[(i+2)%len(self)]=(-1)**(i+1)*(self[i] * other[(i+1)%len(self)]
-                                        -self[(i+1) % len(self)] * other[i])
-        return r
-        #проверить ее надо))
-    def perp(self,other):
+            if i != len(self)-2: 
+                r[(i+2)%len(self)] = (-1)**i * (self[i] * other_vector[(i + 1)%len(self)]
+                                        -self[(i + 1)%len(self)] * other_vector[i])
+            else: 
+                r[(i+2)%len(self)] = (-1)**(i + 1) * (self[i] * other_vector[(i + 1)%len(self)]
+                                        -self[(i + 1)%len(self)] * other_vector[i])
+        return r 
+        #                                                                  _ _
+        # Прошла проверку на 2450 тестах, но выглядит страшно           \  o o  /
+        # Понять её я даже не пытался))                                  \  O  /
+    
+    def perp(self, other):
+        '''
+        ???
+        '''
+        
+        # NOTE (to @RusAv) Вообще непонятно, что это такое
+
         return (self/other)*(1/abs(other))
 
-    def __floordiv__(self, other):
-        r=0
+    def __floordiv__(self, other_vector):
+        '''
+        Скалярное проиведение векторов
+        Задаётся 'x//y'
+        '''
+
+        r = 0
         for i in range(len(self)):
-            r+=self[i]*other[i]
+            r += self[i]*other_vector[i]
         return r
-    def rotated(self,alpha):
-        x,y=self[0],self[1]
-        return Vector(x*np.cos(alpha)-y*np.sin(alpha),x*np.sin(alpha)+y*np.cos(alpha),self[2])
+
+    def rotated(self, alpha):
+        '''
+        Поворот вектора на угол alpha в пл-ти Oxy
+        '''
+        
+        x, y = self[0], self[1]
+        return Vector(x*np.cos(alpha) - y*np.sin(alpha), x*np.sin(alpha) + y*np.cos(alpha), self[2])
+        
+        # NOTE: (to @valerev)  Везде по-хорошему нужно делать проверки на то, что вектора получаются трёхмерными, 
+        # чтобы в случае багов ошибки не накапливались снежным комом.
+        # Думаю, что в пределах допустимого достаточно проверять только при создании вектора.
+        # Но это проблематично, т.к. всё время создаются промежуточные пустые вектора. 
+        # TODO: (to @valerev)  Придумать, как аккуратно за этим следить
 
 
 class Point:
-    def __init__(self,coords=Vector(),speed=Vector(),mass=0,acc=None,q=1):
-        self.coords=coords
-        self.speed=speed
-        self.mass=mass
-        self.acc=acc
-        self.q=q
+    def __init__(self, coords=Vector(), speed=Vector(), mass=0, acc=None, q=1):
+        self.coords = coords
+        self.speed = speed
+        self.mass = mass
+        self.acc = acc
+        self.q = q
+    
     def kinetic_en(self):
         return self.mass*abs(self.speed)**2/2
+    
     def move(self,dt):
         self.coords=self.coords+self.speed*dt
         #print(self.speed)
@@ -116,6 +172,7 @@ class Body:
             I += p.mass * abs(p.coords - self.center) ** 2
 
         return I
+    
     def calc_F(self,Forces):
         #принимает на вход массив
         F=Vector(*[0 for i in range(len(self.points[0].coords))])
@@ -215,10 +272,11 @@ class Field:
 class body_field:
     def __init__(self):
          self.bodies=[]
-    def append(self,body):
+
+    def append(self, body):
          self.bodies.append(body)
 
-    def initial(self,in_body,field):
+    def initial(self, in_body, field):
         '''
         Тут происходит созание поля по массиву в котором каждой точке сопоставлен номер тела, в котором она состоит
         Также вычисляютсю параметры такого тела
@@ -260,9 +318,10 @@ class body_field:
                 p.speed=body.speed+\
                         s.perp(Vector(*[1 for i in range(len(p.coords))]))*\
                         (body.omega*abs(s)*(1/abs(s.perp(Vector(*[1 for i in range(len(p.coords))])))))
-                #Тут стоит некий костыль чтобы определить направление вращательной компоненты скорости мы берем
-                #перпендикулярную проекцию вектора скорости центра масс на радиус вектор точки относ центра масс и делим ее на модуль этого вектора
-                #тем самым получаем единичный вектор, перпендикулярный линии между тоской и цм
+                # Тут стоит некий костыль. Чтобы определить направление вращательной компоненты скорости, мы берем
+                # перпендикулярную проекцию вектора скорости центра масс на радиус вектор 
+                # точки относ центра масс и делим ее на модуль этого вектора
+                # тем самым получаем единичный вектор, перпендикулярный линии между точкой и цм
         print()
     
     def step(self,field,dt):

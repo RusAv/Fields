@@ -3,6 +3,7 @@ from random import *
 import numpy as np
 from matplotlib.animation import *
 
+# TODO: Сделать нормальную размерность у всех векторов. Так оно, конечно, тоже работает, но лучше бы реализовать как-то лучше
 
 class Vector(list):
     def __init__(self, *el):
@@ -18,9 +19,6 @@ class Vector(list):
         for i in range(len(self)):
             r.append(self[i] + other_vector[i])
         return r 
-        # NOTE: (to @RusAv) Объясни @valerev почему нельзя складывать просто покомпонентно
-        # Т.е. for i in range(...): self[i] += other_vector[i] 
-        # Я пробовал, и система себя ведёт иначе в сравнении с этим вариантом
 
     def __sub__(self, other_vector):
         '''
@@ -83,7 +81,7 @@ class Vector(list):
     
     def perp(self, other):
         '''
-        ???
+        ???  
         '''
         
         # NOTE (to @RusAv) Вообще непонятно, что это такое
@@ -108,16 +106,13 @@ class Vector(list):
         
         x, y = self[0], self[1]
         return Vector(x*np.cos(alpha) - y*np.sin(alpha), x*np.sin(alpha) + y*np.cos(alpha), self[2])
-        
-        # NOTE: (to @valerev)  Везде по-хорошему нужно делать проверки на то, что вектора получаются трёхмерными, 
-        # чтобы в случае багов ошибки не накапливались снежным комом.
-        # Думаю, что в пределах допустимого достаточно проверять только при создании вектора.
-        # Но это проблематично, т.к. всё время создаются промежуточные пустые вектора. 
-        # TODO: (to @valerev)  Придумать, как аккуратно за этим следить
 
 
 class Point:
     def __init__(self, coords=Vector(), speed=Vector(), mass=0, acc=None, q=1):
+        '''
+        Создание точки
+        '''
         self.coords = coords
         self.speed = speed
         self.mass = mass
@@ -125,68 +120,99 @@ class Point:
         self.q = q
     
     def kinetic_en(self):
+        '''
+        Функция вычисляет кинетическую энергию точки
+        '''
         return self.mass*abs(self.speed)**2/2
     
     def move(self,dt):
+        '''
+        Функция изменяет координаты точки в зависимости от имеющейся скорости        
+        '''
         self.coords=self.coords+self.speed*dt
-        #print(self.speed)
+        #print(self.speed)  # TODO: Удалить в самом конце
 
     def accelerate(self,dt):
+        '''
+        Вычисляет скорости точки в зависимости от имеющего ускорения
+        '''
         self.speed=self.speed+self.acc*dt
-        #print(self.speed)
+        #print(self.speed)  # TODO: Удалить в самом конце
 
     def acer(self,Force):
+        '''
+        Вычисляет ускорение точки в зависимости от приложенной к ней силы
+        '''
         self.acc=Force*(1/self.mass)
-        #print(self.acc)
+        #print(self.acc)  # TODO: Удалить в самом конце
 
 
 class Body:
-    def __init__(self,dim=3):
-        self.points=[]
-        self.mass=0
-        self.omega=0
-        self.acc=Vector(*[0 for i in range(dim)])
-        self.eps=Vector(*[0 for i in range(dim)])
-        self.speed=Vector(*[0 for i in range(dim)])
-        self.I=0
-        self.center=0
+    def __init__(self, dim=3):
+        '''
+        Создание объекта класса тела
+        '''
+        self.points = []  # Инициализируется список точек в теле. Изначально он пустой 
+        self.mass = 0  # Масса тела равна нулю, т.к. в нём ещё нет точек
+        self.omega = 0  # Угловая скорость 
+        self.acc = Vector(*[0 for i in range(dim)])  # Ускорение центра масс тела
+        self.eps = Vector(*[0 for i in range(dim)])  # Угловое ускорение относительно центра масс
+        self.speed = Vector(*[0 for i in range(dim)])  # Скорость центра масс
+        self.I = 0  # Момент инерции тела
+        self.center = Vector()  # 
 
-    def append(self,p):
-        self.points.append(p)
+    def append(self,point):
+        '''
+        Добавление точки в тело
+        '''
+        self.points.append(point)
 
 
 
     def calc_center(self):
-        center=Vector(*[0 for i in range(len(self.points[0].coords))])
-        sum_mass=0
+        '''
+        Вычисление координат центра масс
+        '''
+        center = Vector(*[0 for i in range(len(self.points[0].coords))])
+        sum_mass = 0
         for p in self.points:
             for i in range(len(p.coords)):
-                center[i]+=p.coords[i]*p.mass
-            sum_mass+=p.mass
+                center[i] += p.coords[i]*p.mass
+            sum_mass += p.mass
         return center*(1/sum_mass)
 
     def calc_i(self):
-        I=0
-        self.center=self.calc_center()
+        '''
+        Вычисление момента инерции тела
+        '''
+        I = 0
+        self.center = self.calc_center()
         for p in self.points:
             I += p.mass * abs(p.coords - self.center) ** 2
-
         return I
     
-    def calc_F(self,Forces):
-        #принимает на вход массив
-        F=Vector(*[0 for i in range(len(self.points[0].coords))])
+    def calc_F(self, Forces : list):
+        '''
+        Вычисляет геометрическую сумму сил, действующих на все точки данного тела
+        Forces - массив сил
+        '''
+
+        F = Vector(*[0 for i in range(len(self.points[0].coords))])
         for p in Forces:
-            F=F+p
-        #print(F)
+            F = F + p
+        #print(F)  # TODO: Удалить в самом конце
         return F
 
-    def calc_momentum(self,Forces):
-        #момент вычисляется сначала векторно чтобы избежать путаницы со знаками
-        momentum=Vector(*[0 for i in range(3)])
-        self.center=self.calc_center()
+    def calc_momentum(self, Forces : list):
+        '''
+        Вычисляет момент сил относительно центра масс тела. 
+        Возвращает скаляр, т.к. момент всегда перпендикулярен плокости Oxy при плоском движении
+        '''
+        # Момент вычисляется сначала векторно чтобы избежать путаницы со знаками
+        momentum = Vector(*[0 for i in range(3)])
+        self.center = self.calc_center()
         for i in range(len(Forces)):
-            momentum=momentum-(self.points[i].coords-self.center)/ (Forces[i])
+            momentum = momentum - (self.points[i].coords - self.center) / (Forces[i])  # TODO: Почему стоит знак "минус"?
         return abs(momentum)
 
     def calc_params(self):
@@ -297,31 +323,27 @@ class body_field:
                     field.Gr_intensity(body.points[i].coords,body.points)*body.points[i].mass
                     +(body.points[i].speed/field.Magnetic_intensity(body.points[i].coords))*body.points[i].q
                     for i in range(len(body.points))]
-            #print(forces)
+            #print(forces)  # TODO: Удалить в самом конце
             body.acer(forces)
 
     def move_points(self,dt):
         for body in self.bodies:
             for p in body.points:
                 s=p.coords-body.center
-                #print(abs(s),"vbh")
+                #print(abs(s),"vbh")  # TODO: Удалить в самом конце
                 p.coords=p.coords+body.speed*dt+(s.rotated(5*body.omega*dt)-s)
             body.move(dt)
-            #print(abs(body.points[1].coords-body.center),'______________sfvd')
+            #print(abs(body.points[1].coords-body.center),'______________sfvd')  # TODO: Удалить в самом конце
 
     def speed_points(self,dt):
         for body in self.bodies:
             body.accelerate(dt)
             for p in body.points:
                 s = p.coords - body.center
-                #print(abs(s))
+                #print(abs(s))  # TODO: Удалить в самом конце
                 p.speed=body.speed+\
                         s.perp(Vector(*[1 for i in range(len(p.coords))]))*\
                         (body.omega*abs(s)*(1/abs(s.perp(Vector(*[1 for i in range(len(p.coords))])))))
-                # Тут стоит некий костыль. Чтобы определить направление вращательной компоненты скорости, мы берем
-                # перпендикулярную проекцию вектора скорости центра масс на радиус вектор 
-                # точки относ центра масс и делим ее на модуль этого вектора
-                # тем самым получаем единичный вектор, перпендикулярный линии между точкой и цм
         print()
     
     def step(self,field,dt):

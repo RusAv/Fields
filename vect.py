@@ -363,11 +363,13 @@ field = Field()
 InBody=[0,0,0,1,1,-1]
 stepik=0
 
-print(type(57)==int)
-for i in range(0, n):
-    field.append(Point(Vector(randint(-x_size/2, x_size/2), randint(-y_size/2, y_size/2),0), Vector(0, 0, 0), 10, Vector(0, 0,0 ), 1))
-body_fi= body_field()
-body_fi.initial(InBody,field)
+def make_points():
+    global body_fi
+    print(type(57)==int)  # NOTE: Ахах... Что это такое???))
+    for i in range(0, n):
+        field.append(Point(Vector(randint(-x_size/2, x_size/2), randint(-y_size/2, y_size/2),0), Vector(0, 0, 0), 10, Vector(0, 0,0 ), 1))
+    body_fi = body_field()
+    body_fi.initial(InBody,field)
 
 
 def sigm(x):
@@ -380,7 +382,7 @@ def sigm(x):
 
 
 def anim(steps):
-    global stepik
+    global stepik, body_fi
     print(steps)
     stepik+=1
     for i in range(9):
@@ -408,9 +410,15 @@ def anim(steps):
     return lines
 
 
+def main():
+    steps=10
+    #anim(1000)
+    animate=FuncAnimation(fig,anim,interval=50,frames=300,blit=False)
+    #animate.save('field3.gif')
+    plt.show()
 
-steps=10
-#anim(1000)
-animate=FuncAnimation(fig,anim,interval=50,frames=300,blit=False)
-#animate.save('field3.gif')
-plt.show()
+
+if __name__ == '__main__':
+    make_points()
+    main()
+

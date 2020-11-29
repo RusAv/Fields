@@ -3,10 +3,14 @@ from random import *
 import numpy as np
 from matplotlib.animation import *
 
-# TODO: Сделать нормальную размерность у всех векторов. Так оно, конечно, тоже работает, но лучше бы реализовать как-то лучше
+# TODO: Сделать нормальную размерность у всех векторов. Так оно, конечно, тоже работает, но лучше бы реализовать как-то иначе.
 
 class Vector(list):
     def __init__(self, *el):
+        '''
+        Создание нового вектора.
+        *el - набор координат
+        '''
         for l in el:
             self.append(l)
 
@@ -76,15 +80,17 @@ class Vector(list):
                                         -self[(i + 1)%len(self)] * other_vector[i])
         return r 
         #                                                                  _ _
-        # Прошла проверку на 2450 тестах, но выглядит страшно           \  o o  /
-        # Понять её я даже не пытался))                                  \  O  /
-    
+        # Прошла проверку на 9590 тестах, но выглядит страшно             |o o|   
+        #                                                              \  | 7 |  /
+        # Понять её я даже не пытался))                                 \ | 0 | /
+        #                                                                \~~~~~/
+
     def perp(self, other):
         '''
         ???  
         '''
         
-        # NOTE (to @RusAv) Вообще непонятно, что это такое
+        # NOTE (to @RusAv) Вообще непонятно, зачем это нужно
 
         return (self/other)*(1/abs(other))
 
@@ -216,6 +222,10 @@ class Body:
         return abs(momentum)
 
     def calc_params(self):
+        '''
+        Рассчитывает параметры тела, такие как:
+        масса, энергия, момент инерции, положение центра масс, линейная скорость, угловая скорость
+        '''
         mas = 0
         energ = 0
         self.I = self.calc_i()
@@ -224,48 +234,66 @@ class Body:
         for p in self.points:
             mas += p.mass
             energ += p.kinetic_en()
-            vel =vel+  p.speed * p.mass
-        self.mass=mas
+            vel = vel + p.speed * p.mass
+        self.mass = mas
         self.speed = vel * (1 / mas)
         self.omega = (2*(energ - (abs(self.speed)**2) * mas / 2) / self.I)**2
 
-    def delete(self,p):
+    def delete(self, point):
         '''
         При удалении точки из тела пересчитываем параметры твердого тела
         '''
-        self.points.remove(p)
+        self.points.remove(point)
         self.calc_params()
     
-    def acer(self,forces):
+    def acer(self, forces):
+        '''
+        Выичсление углового и линейного ускорени тела исходя из действующих на него сил
+        '''
         self.eps = self.calc_momentum(forces) / self.I
         self.acc = self.calc_F(forces) *(1 / self.mass)
     
-    def accelerate(self,dt):
+    def accelerate(self, dt):
+        '''
+        Вычисление угловой и линейной скорости тела, исходя из имеющихся ускорений
+        '''
         self.omega += self.eps * dt
         self.speed = self.speed + self.acc*dt
 
-    def move(self,dt):
-        self.center=self.center + self.speed*dt
+    def move(self, dt):
+        '''
+        Изменение координат центра масс тела, исходя из имеющейся линейной скорости
+        '''
+        self.center = self.center + self.speed*dt
 
 
-G=100
-K=10**8
-C=5
 
 
 class Field:
+    G=100  # Гравитационная постоянная
+    k=10**8  # Электрическая постоянная
+    mu_0=5  # Магнитаня постоянная
+    
     def __init__(self):
+        '''
+        Конструктор объекта для управлния полями.
+        Также он хранит множество всех материальных точек в симуляции, изначльно это множество пустое
+        '''
         self.points=[]
+    
     def append(self,p):
+        '''
+        Добавление материальной точки в список точек, участвующих в симуляции
+        '''
         self.points.append(p)
-    def intensity(self,coord,pointis=[]):
-
+    
+    def El_intensity(self,coord,pointis=[]):
         proj = Vector(*[0 for i in range(len(coord))])
         for point in self.points:
             if point not in pointis:
                 if coord % point.coords < 10 ** (-9):
                     continue
-                proj = proj - (point.coords - coord) * (K * point.q / ((point.coords % coord) ** 3))
+                proj = proj - (point.coords - coord) * (Field.k * point.q / ((point.coords % coord) ** 3))
         return proj
 
     def Gr_intensity(self, vect, pointis=[]):
@@ -274,24 +302,26 @@ class Field:
             if p not in pointis:
                 if vect % p.coords < 10 ** (-9):
                     continue
-                inten = inten - (vect - p.coords)*(G * p.mass  / abs(vect - p.coords) ** 3)
+                inten = inten - (vect - p.coords)*(Field.G * p.mass  / abs(vect - p.coords) ** 3)
         return inten
 
-    def Magnetic_intensity(self, vect, pointis=[]):
+    def Mg_intensity(self, vect, pointis=[]):
         inten = Vector(*[0 for i in range(len(vect))])
         for p in self.points:
             if p not in pointis:
                 if vect % p.coords < 10 ** (-9):
                     continue
-                inten = inten+(p.speed/(p.coords-vect))*(C/abs(p.coords-vect)**3)
+                inten = inten+(p.speed/(p.coords-vect))*(Field.mu_0/abs(p.coords-vect)**3)
         return inten
 
-    def step(self,InBody,dt):
+    def step(self, InBody, dt):
         for i in range(len(self.points)):
             p=self.points[i]
             if InBody[i]==-1:
                 p.move(dt)
-                p.acer(self.intensity(p.coords)*p.q+self.Gr_intensity(p.coords)*p.mass+(p.speed/self.Magnetic_intensity(p.coords))*p.q)
+                p.acer(self.El_intensity(p.coords) * p.q + 
+                       self.Gr_intensity(p.coords) * p.mass +  
+                       (p.speed/self.Mg_intensity(p.coords)) * p.q)
                 p.accelerate(dt)
 
 
@@ -304,7 +334,7 @@ class body_field:
 
     def initial(self, in_body, field):
         '''
-        Тут происходит созание поля по массиву в котором каждой точке сопоставлен номер тела, в котором она состоит
+        Тут происходит создание поля по массиву в котором каждой точке сопоставлен номер тела, в котором она состоит
         Также вычисляютсю параметры такого тела
         Вызов этой функции происходит каждый ра зкогда меняется поле
         '''
@@ -319,9 +349,9 @@ class body_field:
     def change_params(self,field,dt):
         for body in self.bodies:
             #body.I=body.calc_i()
-            forces=[field.intensity(body.points[i].coords,body.points)*body.points[i].q +
+            forces=[field.El_intensity(body.points[i].coords,body.points)*body.points[i].q +
                     field.Gr_intensity(body.points[i].coords,body.points)*body.points[i].mass
-                    +(body.points[i].speed/field.Magnetic_intensity(body.points[i].coords))*body.points[i].q
+                    +(body.points[i].speed/field.Mg_intensity(body.points[i].coords))*body.points[i].q
                     for i in range(len(body.points))]
             #print(forces)  # TODO: Удалить в самом конце
             body.acer(forces)

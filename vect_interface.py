@@ -4,6 +4,8 @@ from tkinter import *
 sense = 5 #дальность обнаружения мыши
 con_working = False
 con_clicks = 0
+window_width = 615
+window_height = 615
 
 def connect_check():
     global con_clicks, con_working
@@ -17,7 +19,18 @@ def connect_check():
                               bg = 'gray94')
         con_working = False
 
-'''Надо задать функцию соединения точек, на которые наводится мышь'''
+def connect(event):
+    global k, r, sense, con_working, bodies
+    x = event.x
+    y = event.y
+    for k in range (len(r)):
+        pointx = (r[k][0] + 20)*15
+        pointy = (r[k][1] + 20)*15
+        if (x - pointx)**2 + (y - pointy)**2 < sense**2 and con_working:
+            if len(bodies) == 0 or len(bodies[-1]) == 2:
+                bodies.append([k])
+            elif len(bodies[-1]) == 1:
+                bodies[-1].append(k)
 
 class Mouse():
     x = 0
@@ -27,8 +40,6 @@ class Mouse():
         self.y = event.y
 
 window = Tk()
-window_width = 615
-window_height = 615
 electro = Canvas(window, width=window_width, height=window_height, bg="white")
 electro.pack(side=LEFT)
 magnet = Canvas(window, width=window_width, height=window_height, bg="white")
@@ -38,12 +49,12 @@ frame.pack(side=BOTTOM)
 connect_button = Button(frame, width = 25, text="Режим соединения: включить",
                         command = connect_check)
 connect_button.pack()
+mouse = Mouse()
 
 '''Массив точек, генерируемых в теоретическом модуле'''
 r = [[-17, -20, 0], [-8, 7, 0], [-11, -12, 0], [0, -2, 0],
      [10, 2, 0], [5, -12, 0], [14, 6, 0]]
-
-mouse = Mouse()
+bodies = []
 
 while True:
     
@@ -63,13 +74,26 @@ while True:
                                 pointy + sense, fill="red")
             magnet.create_oval(pointx - sense, pointy - sense, pointx + sense,
                                 pointy + sense, fill="red")
+    for k in range (len(bodies)):
+        if len(bodies[k]) == 2:
+            pointx1 = (r[bodies[k][0]][0] + 20)*15
+            pointy1 = (r[bodies[k][0]][1] + 20)*15
+            pointx2 = (r[bodies[k][1]][0] + 20)*15
+            pointy2 = (r[bodies[k][1]][1] + 20)*15
+            electro.create_line(pointx1, pointy1, pointx2, pointy2)
+            magnet.create_line(pointx1, pointy1, pointx2, pointy2)
+        else:
+            pointx1 = (r[bodies[k][0]][0] + 20)*15
+            pointy1 = (r[bodies[k][0]][1] + 20)*15
+            electro.create_line(pointx1, pointy1, x, y)
+            magnet.create_line(pointx1, pointy1, x, y)
     
     '''Получение координат мыши'''
     try:
         window.bind('<Motion>', mouse.coords)
+        window.bind('<Button-1>', connect)
     except TclError:
         break
-    
     window.update()
     try:
         electro.delete('all')

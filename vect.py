@@ -287,7 +287,11 @@ class Field:
         '''
         self.points.append(p)
     
-    def El_intensity(self,coord,pointis=[]):
+    def El_intensity(self, coord, pointis=[]):
+        '''
+        Вычисляет напряженность электрического поля в данной точке с координатами coords.
+        При этом игнорируются точки из массива points
+        '''
         proj = Vector(*[0 for i in range(len(coord))])
         for point in self.points:
             if point not in pointis:
@@ -297,6 +301,10 @@ class Field:
         return proj
 
     def Gr_intensity(self, vect, pointis=[]):
+        '''
+        Вычисляет напряженность магнитного поля в данной точке с координатами vect.
+        При этом игнорируются точки из массива points
+        '''
         inten = Vector(*[0 for i in range(len(vect))])
         for p in self.points:
             if p not in pointis:
@@ -306,6 +314,10 @@ class Field:
         return inten
 
     def Mg_intensity(self, vect, pointis=[]):
+        '''
+        Вычисляет напряженность гравитационного поля в данной точке с координатами vect.
+        При этом игнорируются точки из массива points
+        '''
         inten = Vector(*[0 for i in range(len(vect))])
         for p in self.points:
             if p not in pointis:
@@ -315,6 +327,9 @@ class Field:
         return inten
 
     def step(self, InBody, dt):
+        '''
+        ...
+        '''
         for i in range(len(self.points)):
             p=self.points[i]
             if InBody[i]==-1:

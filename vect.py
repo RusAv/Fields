@@ -270,7 +270,7 @@ class Body:
 class Field:
     G = 100  # Гравитационная постоянная
     k = 10 ** 8  # Электрическая постоянная
-    mu_0 = 5  # Магнитаня постоянная
+    mu_0 = 5  # Магнитная постоянная
 
     def __init__(self):
         '''
@@ -349,7 +349,7 @@ class body_field:
         '''
         Тут происходит создание поля по массиву в котором каждой точке сопоставлен номер тела, в котором она состоит
         Также вычисляютсю параметры такого тела
-        Вызов этой функции происходит каждый ра зкогда меняется поле
+        Вызов этой функции происходит каждый раз когда меняется поле
         '''
         l = max(in_body) + 1
         self.bodies = [Body() for i in range(l)]
@@ -386,7 +386,7 @@ class body_field:
                 p.speed = body.speed + \
                           s.perp(Vector(*[1 for i in range(len(p.coords))])) * \
                           (body.omega * abs(s) * (1 / abs(s.perp(Vector(*[1 for i in range(len(p.coords))])))))
-        print()
+        # print()
 
     def step(self, field, dt):
         self.change_params(field, dt)
@@ -404,6 +404,7 @@ ax.set_ylim(-y_size * 10, y_size * 10)
 field = Field()
 InBody = [0, 0, 0, 1, 1, -1]
 stepik = 0
+dt = 0.001
 
 
 def make_points():
@@ -425,27 +426,28 @@ def sigm(x):
     return 1 / (1 + 1.000055 ** (-x))
 
 def Grand_field(dt):
+    global  body_fi
     for i in range(9):
         field.step(InBody, dt)
         body_fi.step(field, dt)
     res = []
-    STEP = 60
+    STEP = 40
     point_s=[]
     for p in field.points:
         point_s.append(p.coords)
     for x in np.arange(-x_size, x_size, STEP):
         for y in np.arange(-y_size, y_size, STEP):
             # print(x,'  ',y)
-            vec = field.intensity(Vector(x, y, 0))
+            vec = field.Gr_intensity(Vector(x, y, 0))
             grad = abs(vec)
             vec = vec * (STEP * (1 / abs(vec)))
             res.append(([x - vec[0] / 2, x + vec[0] / 2], [y - vec[1] / 2, y + vec[1] / 2], grad))
-    return res,point_s
+    return res, point_s, STEP
 
 
 def anim(steps):
     global  body_fi
-    print(steps)
+    # print(steps)
     for i in range(9):
         field.step(InBody, 0.001)
         body_fi.step(field, 0.001)
@@ -477,7 +479,11 @@ def main():
     # animate.save('field3.gif')
     plt.show()
 
-
+'''make_points()
+res, point_s = Grand_field(dt)
+print(res)
+print(' ')
+print(point_s)
 if __name__ == '__main__':
     make_points()
-    main()
+    main()'''

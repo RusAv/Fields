@@ -122,7 +122,7 @@ while True:
         vectors, points, step = Grand_field(dt)
     x = mouse.x
     y = mouse.y
-    create_electro_vectors(step, vectors, electro)
+    create_electro_vectors(vectors, electro)
     create_points(mouse, con_working, points, electro, magnet)
     create_lines_between_points(con_working, points, bonds, x, y, electro, magnet)
     highlight_lines_between_points(del_working, points, bonds, x, y, electro, magnet)

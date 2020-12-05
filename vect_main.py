@@ -12,6 +12,15 @@ window_height = 610
 dt = 0.001
 paused = False
 
+def electro():
+    global mode
+    mode = 0
+def magnet():
+    global mode
+    mode = 2
+def gravit():
+    global mode
+    mode = 1
 
 def connect_check():
     global con_clicks, del_clicks, con_working, del_working, bonds
@@ -87,7 +96,7 @@ def delete(event):
     global points, con_working, bonds
     x = event.x
     y = event.y
-    highlight_lines_between_points(del_working, points, bonds, x, y, electro, magnet)
+    highlight_lines_between_points(del_working, points, bonds, x, y, screen)
     for k in range (len(bonds)-1, -1, -1):
         if len(bonds[k]) == 2:
             dist = dist_mouse_to_line(k, points, bonds, x, y)
@@ -95,12 +104,21 @@ def delete(event):
                 del bonds[k]
 
 root = Tk()
+mode_frame = Frame(root)
+mode_frame.pack(side=TOP)
+electro_button = Button(mode_frame, width = 25, text="Электрическое поле",
+                        command = electro)
+electro_button.pack(side=LEFT)
+magnet_button = Button(mode_frame, width = 25, text="Магнитное поле",
+                       command = magnet)
+magnet_button.pack(side=LEFT)
+gravit_button = Button(mode_frame, width = 25, text="Гравитационное поле",
+                       command = gravit)
+gravit_button.pack(side=LEFT)
 root_frame = Frame(root)
 root_frame.pack(side=TOP)
-electro = Canvas(root_frame, width=window_width, height=window_height, bg="white")
-electro.pack(side=LEFT)
-magnet = Canvas(root_frame, width=window_width, height=window_height, bg="white")
-magnet.pack(side=RIGHT)
+screen = Canvas(root_frame, width=window_width, height=window_height, bg="white")
+screen.pack(side=LEFT)
 button_frame = Frame(root)
 button_frame.pack(side=BOTTOM)
 connect_button = Button(button_frame, width = 25, text="Режим соединения: включить",
@@ -113,19 +131,21 @@ pause_button = Button(button_frame, width = 25, text="Пауза",
                         command = paused_check)
 pause_button.pack(side=LEFT)
 mouse = Mouse()
-points = []
-bonds = []
-    
 make_points()
+mode = 0
+Field, points, step, bodies = Grand_field(mode, dt)
+bonds = create_first_bonds(points, bodies)
+
 while True:
     if not paused:
-        vectors, points, step = Grand_field(dt)
+        Field, points, step, bodies = Grand_field(mode, dt)
+    vectors = Field[0]
     x = mouse.x
     y = mouse.y
-    create_electro_vectors(vectors, electro)
-    create_points(mouse, con_working, points, electro, magnet)
-    create_lines_between_points(con_working, points, bonds, x, y, electro, magnet)
-    highlight_lines_between_points(del_working, points, bonds, x, y, electro, magnet)
+    create_vectors(vectors, screen)
+    create_points(mouse, con_working, points, screen)
+    create_lines_between_points(con_working, points, bonds, x, y, screen)
+    highlight_lines_between_points(del_working, points, bonds, x, y, screen)
     try:
         root.bind('<Motion>', mouse.coords)
         if con_working:
@@ -136,7 +156,6 @@ while True:
         break
     root.update()
     try:
-        electro.delete('all')
-        magnet.delete('all')
+        screen.delete('all')
     except TclError:
         break

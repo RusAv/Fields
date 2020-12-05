@@ -330,7 +330,7 @@ class Field:
         '''
         for i in range(len(self.points)):
             p = self.points[i]
-            #print(i)
+            print(i)
             if InBody[i] == -1:
                 p.move(dt)
                 p.acer(self.El_intensity(p.coords) * p.q +
@@ -355,6 +355,7 @@ class body_field:
         l = max(in_body) + 1
         self.bodies = [Body() for i in range(l)]
         for i in range(len(in_body)):
+            print(in_body)
             if in_body[i] != -1: self.bodies[in_body[i]].points.append(field.points[i])
         for body in self.bodies:
             body.calc_params()
@@ -395,7 +396,7 @@ class body_field:
         self.speed_points(dt)
 
 
-n = 6
+n = 7
 x_size = 300
 y_size = 300
 fig = plt.figure()
@@ -403,7 +404,9 @@ ax = plt.subplot(111)
 ax.set_xlim(-x_size * 10, x_size * 10)
 ax.set_ylim(-y_size * 10, y_size * 10)
 field = Field()
-InBody = [0, 0, 0, 1, 1, -1]
+InBody = [0, 0, 0, -1,0,0,0]
+body_fi = body_field()
+Links=[[0,0,0,1,0,0,0],[0,0,0,1,0,0,0],[0,0,0,0,1,1,1],[1,1,0,0,0,0,0],[0,0,1,0,0,0,0],[0,0,1,0,0,0,0],[0,0,1,0,0,1,1]]
 stepik = 0
 dt = 0.001
 
@@ -414,7 +417,6 @@ def make_points():
         field.append(
             Point(Vector(randint(-x_size / 5, x_size / 5), randint(-y_size / 5, y_size / 5), 0), Vector(0, 0, 0), 10,
                   Vector(0, 0, 0), 1))
-    body_fi = body_field()
     body_fi.initial(InBody, field)
 
 
@@ -471,3 +473,52 @@ def Grand_field(mode, dt):
     points=return_points()
     bodie=return_bodies()
     return Field, points, STEP, bodie
+
+
+def DFS(vertice,it):
+    count=0
+    InBody[vertice]=it
+    for i in range(len(Links[vertice])):
+        if i!=vertice and Links[i][vertice]==1 and InBody[i]==-2:
+            count+=DFS(i,it)
+    count+=1
+    print(count)
+    return count
+
+def Re_calc_Links():
+    global Links,InBody,body_fi
+    marker=0
+    InBody=[-2 for i in range(len(InBody))]
+    for i in range(len(InBody)):
+        if InBody[i]==-2:
+                c=DFS(i,marker)
+                if c==1:InBody[i]=-1
+                marker+=1
+
+def Re_calc_all():
+    Re_calc_Links()
+    print(InBody,457656)
+    body_fi.initial(InBody,field)
+
+
+
+
+def main():
+    steps = 10
+    # anim(1000)
+    animate = FuncAnimation(fig, anim, interval=50, frames=300, blit=False)
+    # animate.save('field3.gif')
+    plt.show()
+
+make_points()
+#res, point_s,step,bodie = Grand_field(dt)
+#print(res)
+#print('dfdfb ')
+#print(point_s)
+print(InBody)
+Re_calc_all()
+print(InBody)
+'''
+if __name__ == '__main__':
+    make_points()
+    main() '''

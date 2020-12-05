@@ -330,7 +330,7 @@ class Field:
         '''
         for i in range(len(self.points)):
             p = self.points[i]
-            print(i)
+            #print(i)
             if InBody[i] == -1:
                 p.move(dt)
                 p.acer(self.El_intensity(p.coords) * p.q +
@@ -459,61 +459,15 @@ def return_bodies():
         bodie.append(b.points)
     return bodie
 
-def Grand_field(dt):
+def Grand_field(mode, dt):
     global  body_fi
     #шаг поля
     for i in range(9):
         field.step(InBody, dt)
         body_fi.step(field, dt)
     STEP = 40
-    Fields=[]
-    
-    for i in range(3):
-        Fields+=return_field(i,STEP)
+    Field=[]
+    Field.append(return_field(mode,STEP))
     points=return_points()
     bodie=return_bodies()
-    return Fields, points, STEP, bodie
-
-
-def anim(steps):
-    global  body_fi
-    # print(steps)
-    for i in range(9):
-        field.step(InBody, 0.001)
-        body_fi.step(field, 0.001)
-    print(abs(body_fi.bodies[0].points[1].coords - body_fi.bodies[0].center))
-    print(abs(field.points[2].coords - body_fi.bodies[0].center))
-    res = []
-    STEP = 20
-    for x in np.arange(-x_size, x_size, STEP):
-        for y in np.arange(-y_size, y_size, STEP):
-            # print(x,'  ',y)
-            vec = field.Gr_intensity(Vector(x, y, 0))
-            grad = abs(vec)
-            vec = vec * (STEP * (1 / abs(vec)))
-            res.append(([x - vec[0] / 2, x + vec[0] / 2], [y - vec[1] / 2, y + vec[1] / 2], grad))
-    ax.clear()
-    ax.set_xlim(-x_size, x_size)
-    ax.set_ylim(-y_size, y_size)
-    lines = []
-    for r in res:
-        lines.append(ax.plot(r[0], r[1], color=(sigm(r[2]), 0.1, 0.8 * (1 - sigm(r[2])))))
-
-    return lines
-
-
-def main():
-    steps = 10
-    # anim(1000)
-    animate = FuncAnimation(fig, anim, interval=50, frames=300, blit=False)
-    # animate.save('field3.gif')
-    plt.show()
-
-make_points()
-res, point_s,step,bodie = Grand_field(dt)
-print(res)
-print('dfdfb ')
-print(point_s)
-if __name__ == '__main__':
-    make_points()
-    main()
+    return Field, points, STEP, bodie

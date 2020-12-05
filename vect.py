@@ -330,6 +330,7 @@ class Field:
         '''
         for i in range(len(self.points)):
             p = self.points[i]
+            print(i)
             if InBody[i] == -1:
                 p.move(dt)
                 p.acer(self.El_intensity(p.coords) * p.q +
@@ -425,24 +426,53 @@ def sigm(x):
     '''
     return 1 / (1 + 1.000055 ** (-x))
 
-def Grand_field(dt):
-    global  body_fi
-    for i in range(9):
-        field.step(InBody, dt)
-        body_fi.step(field, dt)
-    res = []
-    STEP = 40
+def return_points():
     point_s=[]
     for p in field.points:
         point_s.append(p.coords)
+    return point_s
+        
+def return_field(flag,STEP):
+    res = []
+    '''
+    flag=0 возвращает электрическое поле
+    flag=1 возвращает гравитационное поле
+    flag=2 возвращает магнитное поле
+    '''
     for x in np.arange(-x_size, x_size, STEP):
         for y in np.arange(-y_size, y_size, STEP):
             # print(x,'  ',y)
-            vec = field.Gr_intensity(Vector(x, y, 0))
+            if (flag==0) :
+                vec = field.El_intensity(Vector(x, y, 0))
+            elif (flag==1):
+                vec = field.Gr_intensity(Vector(x, y, 0))
+            elif (flag==2):
+                vec = field.Mg_intensity(Vector(x, y, 0))
             grad = abs(vec)
             vec = vec * (STEP * (1 / abs(vec)))
             res.append(([x - vec[0] / 2, x + vec[0] / 2], [y - vec[1] / 2, y + vec[1] / 2], grad))
-    return res, point_s, STEP
+    return res
+
+def return_bodies():
+    bodie=[]
+    for b in body_fi.bodies:
+        bodie.append(b.points)
+    return bodie
+
+def Grand_field(dt):
+    global  body_fi
+    #шаг поля
+    for i in range(9):
+        field.step(InBody, dt)
+        body_fi.step(field, dt)
+    STEP = 40
+    Fields=[]
+    
+    for i in range(3):
+        Fields+=return_field(i,STEP)
+    points=return_points()
+    bodie=return_bodies()
+    return Fields, points, STEP, bodie
 
 
 def anim(steps):
@@ -479,11 +509,11 @@ def main():
     # animate.save('field3.gif')
     plt.show()
 
-'''make_points()
-res, point_s = Grand_field(dt)
+make_points()
+res, point_s,step,bodie = Grand_field(dt)
 print(res)
-print(' ')
+print('dfdfb ')
 print(point_s)
 if __name__ == '__main__':
     make_points()
-    main()'''
+    main()

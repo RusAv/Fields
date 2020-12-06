@@ -216,9 +216,11 @@ class Body:
         # Момент вычисляется сначала векторно чтобы избежать путаницы со знаками
         momentum = Vector(*[0 for i in range(3)])
         self.center = self.calc_center()
+        print(Forces)
         for i in range(len(Forces)):
             momentum = momentum - (self.points[i].coords - self.center) / (
             Forces[i])  # TODO: Почему стоит знак "минус"?
+        print(momentum,'sdfsdf')
         return abs(momentum)
 
     def calc_params(self):
@@ -228,7 +230,6 @@ class Body:
         '''
         mas = 0
         energ = 0
-        self.I = self.calc_i()
         self.center = self.calc_center()
         vel = Vector(*[0 for i in range(3)])
         for p in self.points:
@@ -236,8 +237,10 @@ class Body:
             energ += p.kinetic_en()
             vel = vel + p.speed * p.mass
         self.mass = mas
+        self.I = self.calc_i()
         self.speed = vel * (1 / mas)
         self.omega = (2 * (energ - (abs(self.speed) ** 2) * mas / 2) / self.I) ** 2
+        print(self.I,self.center,self.omega,self.speed)
 
     def delete(self, point):
         '''
@@ -269,8 +272,8 @@ class Body:
 
 class Field:
     G = 100  # Гравитационная постоянная
-    k = 10 ** 8  # Электрическая постоянная
-    mu_0 = 5  # Магнитная постоянная
+    k = 10 ** 7  # Электрическая постоянная
+    mu_0 = 0.6  # Магнитная постоянная
 
     def __init__(self):
         '''
@@ -322,6 +325,7 @@ class Field:
                 if vect % p.coords < 10 ** (-9):
                     continue
                 inten = inten + (p.speed / (p.coords - vect)) * (Field.mu_0 / abs(p.coords - vect) ** 3)
+        print(inten)
         return inten
 
     def step(self, InBody, dt):
@@ -382,7 +386,7 @@ class body_field:
             body.accelerate(dt)
             for p in body.points:
                 s = p.coords - body.center
-                # print(abs(s))  # TODO: Удалить в самом конце
+                if abs(s)<1: print(abs(s),'   ',body.center)  # TODO: Удалить в самом конце
                 p.speed = body.speed + \
                           s.perp(Vector(*[1 for i in range(len(p.coords))])) * \
                           (body.omega * abs(s) * (1 / abs(s.perp(Vector(*[1 for i in range(len(p.coords))])))))
@@ -489,11 +493,13 @@ def Re_calc_Links():
     for i in range(len(InBody)):
         if InBody[i]==-2:
                 c=DFS(i,marker)
-                if c==1:InBody[i]=-1
-                marker+=1
+                if c==1:
+                    InBody[i]=-1
+                else:marker+=1
 
 def Re_calc_all():
     Re_calc_Links()
+    #print(InBody)
     body_fi.initial(InBody,field)
 
 def anim(steps):

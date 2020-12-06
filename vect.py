@@ -93,7 +93,7 @@ class Vector(list):
 
         # NOTE (to @RusAv) Вообще непонятно, зачем это нужно
 
-        return (self / other) * (1 / abs(other))
+        return (self / other) * (1 / (abs(other)*abs(self)))
 
     def __floordiv__(self, other_vector):
         '''
@@ -216,11 +216,11 @@ class Body:
         # Момент вычисляется сначала векторно чтобы избежать путаницы со знаками
         momentum = Vector(*[0 for i in range(3)])
         self.center = self.calc_center()
-        print(Forces)
+        #print(Forces,'dcd')
         for i in range(len(Forces)):
             momentum = momentum - (self.points[i].coords - self.center) / (
             Forces[i])  # TODO: Почему стоит знак "минус"?
-        print(momentum,'sdfsdf')
+        #print(momentum,'sdfsdf')
         return abs(momentum)
 
     def calc_params(self):
@@ -239,8 +239,8 @@ class Body:
         self.mass = mas
         self.I = self.calc_i()
         self.speed = vel * (1 / mas)
-        self.omega = (2 * (energ - (abs(self.speed) ** 2) * mas / 2) / self.I) ** 2
-        print(self.I,self.center,self.omega,self.speed)
+        self.omega = (2 * (energ - (abs(self.speed) ** 2) * mas / 2) / self.I) ** 0.5
+        #print(self.I,self.center,self.omega,self.speed)
 
     def delete(self, point):
         '''
@@ -299,6 +299,7 @@ class Field:
                 if coord % point.coords < 10 ** (-9):
                     continue
                 proj = proj - (point.coords - coord) * (Field.k * point.q / ((point.coords % coord) ** 3))
+        proj[2]=0
         return proj
 
     def Gr_intensity(self, vect, pointis=[]):
@@ -312,6 +313,7 @@ class Field:
                 if vect % p.coords < 10 ** (-9):
                     continue
                 inten = inten - (vect - p.coords) * (Field.G * p.mass / abs(vect - p.coords) ** 3)
+        inten[2]=0
         return inten
 
     def Mg_intensity(self, vect, pointis=[]):
@@ -325,7 +327,8 @@ class Field:
                 if vect % p.coords < 10 ** (-9):
                     continue
                 inten = inten + (p.speed / (p.coords - vect)) * (Field.mu_0 / abs(p.coords - vect) ** 3)
-        print(inten)
+        inten[1]=0
+        inten[0]=0
         return inten
 
     def step(self, InBody, dt):
@@ -364,12 +367,10 @@ class body_field:
 
     def change_params(self, field, dt):
         for body in self.bodies:
-            # body.I=body.calc_i()
             forces = [field.El_intensity(body.points[i].coords, body.points) * body.points[i].q +
                       field.Gr_intensity(body.points[i].coords, body.points) * body.points[i].mass
                       + (body.points[i].speed / field.Mg_intensity(body.points[i].coords)) * body.points[i].q
                       for i in range(len(body.points))]
-            # print(forces)  # TODO: Удалить в самом конце
             body.acer(forces)
 
     def move_points(self, dt):
@@ -379,7 +380,6 @@ class body_field:
                 # print(abs(s),"vbh")  # TODO: Удалить в самом конце
                 p.coords = p.coords + body.speed * dt + (s.rotated(5 * body.omega * dt) - s)
             body.move(dt)
-            # print(abs(body.points[1].coords-body.center),'______________sfvd')  # TODO: Удалить в самом конце
 
     def speed_points(self, dt):
         for body in self.bodies:
@@ -388,10 +388,9 @@ class body_field:
                 s = p.coords - body.center
                 if abs(s)<1: print(abs(s),'   ',body.center)  # TODO: Удалить в самом конце
                 p.speed = body.speed + \
-                          s.perp(Vector(*[1 for i in range(len(p.coords))])) * \
-                          (body.omega * abs(s) * (1 / abs(s.perp(Vector(*[1 for i in range(len(p.coords))])))))
-        # print()
-
+                          s.perp(Vector(0,0,1)) * \
+                          (body.omega * abs(s) * (1 / abs(s.perp(Vector(0,0,1)))))
+                
     def step(self, field, dt):
         self.change_params(field, dt)
         self.move_points(dt)
@@ -499,7 +498,7 @@ def Re_calc_Links():
 
 def Re_calc_all():
     Re_calc_Links()
-    #print(InBody)
+    print(InBody)
     body_fi.initial(InBody,field)
 
 def anim(steps):

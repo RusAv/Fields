@@ -129,7 +129,7 @@ root_frame.pack(side=TOP)
 screen = Canvas(root_frame, width=window_width, height=window_height, bg="white")
 screen.pack(side=LEFT)
 button_frame = Frame(root)
-button_frame.pack(side=BOTTOM)
+button_frame.pack(side=TOP)
 connect_button = Button(button_frame, width = 25, text="Режим соединения: включить",
                         command = connect_check)
 connect_button.pack(side=LEFT)

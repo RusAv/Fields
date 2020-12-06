@@ -155,7 +155,13 @@ while True:
     vectors = Field[0]
     x = mouse.x
     y = mouse.y
-    create_vectors(vectors, window_settings, screen)
+    if mode == 0:
+        create_electro_vectors(vectors, window_settings, screen)
+    elif mode == 1:
+        create_gravit_vectors(vectors, window_settings, screen)
+    else:
+        create_magnet_squares(vectors, x_size, y_size, step, window_settings,
+                              screen)
     create_points(mouse, con_working, points,
                   window_settings, screen)
     create_lines_between_points(con_working, points, bonds, x, y,

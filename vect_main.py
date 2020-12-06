@@ -9,6 +9,9 @@ del_clicks = 0
 pau_clicks = 0
 dt = 0.001
 paused = False
+window_width = 610
+window_height = 610
+window_settings = [window_width, window_height, x_size, y_size]
 
 def electro():
     global mode
@@ -79,8 +82,8 @@ def connect(event):
     x = event.x
     y = event.y
     for k in range (len(points)):
-        pointx = points[k][0] + window_width/2 + 15
-        pointy = points[k][1] + window_height/2 + 15
+        pointx = scale_x(points[k][0], window_settings)
+        pointy = scale_y(points[k][1], window_settings)
         if (x - pointx)**2 + (y - pointy)**2 < sense**2 and con_working:
             if len(bonds) == 0 or len(bonds[-1]) == 2:
                 bonds.append([k])
@@ -97,10 +100,11 @@ def delete(event):
     global points, con_working, bonds, flag
     x = event.x
     y = event.y
-    highlight_lines_between_points(del_working, points, bonds, x, y, screen)
+    highlight_lines_between_points(del_working, points, bonds, x, y,
+                                   window_settings, screen)
     for k in range (len(bonds)-1, -1, -1):
         if len(bonds[k]) == 2:
-            dist = dist_mouse_to_line(k, points, bonds, x, y)
+            dist = dist_mouse_to_line(k, points, bonds, x, y, window_settings)
             if dist < max_dist and del_working:
                 flag = True
                 Links[bonds[k][0]][bonds[k][1]] = 0
@@ -151,11 +155,13 @@ while True:
     vectors = Field[0]
     x = mouse.x
     y = mouse.y
-    create_vectors(vectors, screen)
-    create_points(mouse, con_working, points, screen)
-    create_lines_between_points(con_working, points, bonds, x, y, screen)
-    highlight_lines_between_points(del_working, points, bonds, x, y, screen)
-    Links1 = Links
+    create_vectors(vectors, window_settings, screen)
+    create_points(mouse, con_working, points,
+                  window_settings, screen)
+    create_lines_between_points(con_working, points, bonds, x, y,
+                                window_settings, screen)
+    highlight_lines_between_points(del_working, points, bonds, x, y,
+                                   window_settings, screen)
     try:
         root.bind('<Motion>', mouse.coords)
         if con_working:

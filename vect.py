@@ -330,7 +330,6 @@ class Field:
         '''
         for i in range(len(self.points)):
             p = self.points[i]
-            print(i)
             if InBody[i] == -1:
                 p.move(dt)
                 p.acer(self.El_intensity(p.coords) * p.q +
@@ -355,7 +354,6 @@ class body_field:
         l = max(in_body) + 1
         self.bodies = [Body() for i in range(l)]
         for i in range(len(in_body)):
-            print(in_body)
             if in_body[i] != -1: self.bodies[in_body[i]].points.append(field.points[i])
         for body in self.bodies:
             body.calc_params()
@@ -482,7 +480,6 @@ def DFS(vertice,it):
         if i!=vertice and Links[i][vertice]==1 and InBody[i]==-2:
             count+=DFS(i,it)
     count+=1
-    print(count)
     return count
 
 def Re_calc_Links():
@@ -497,11 +494,30 @@ def Re_calc_Links():
 
 def Re_calc_all():
     Re_calc_Links()
-    print(InBody,457656)
     body_fi.initial(InBody,field)
 
+def anim(steps):
+    global  body_fi
+    for i in range(9):
+        field.step(InBody, 0.001)
+        body_fi.step(field, 0.001)
+    res = []
+    STEP = 20
+    for x in np.arange(-x_size, x_size, STEP):
+        for y in np.arange(-y_size, y_size, STEP):
+            # print(x,'  ',y)
+            vec = field.Mg_intensity(Vector(x, y, 0))
+            grad = abs(vec)
+            vec = vec * (STEP * (1 / abs(vec)))
+            res.append(([x - vec[0] / 2, x + vec[0] / 2], [y - vec[1] / 2, y + vec[1] / 2], grad))
+    ax.clear()
+    ax.set_xlim(-x_size, x_size)
+    ax.set_ylim(-y_size, y_size)
+    lines = []
+    for r in res:
+        lines.append(ax.plot(r[0], r[1], color=(sigm(r[2]), 0.1, 0.8 * (1 - sigm(r[2])))))
 
-
+    return lines
 
 def main():
     steps = 10
@@ -510,15 +526,12 @@ def main():
     # animate.save('field3.gif')
     plt.show()
 
-make_points()
+'''make_points()
 #res, point_s,step,bodie = Grand_field(dt)
 #print(res)
 #print('dfdfb ')
 #print(point_s)
-print(InBody)
 Re_calc_all()
-print(InBody)
-'''
+
 if __name__ == '__main__':
-    make_points()
-    main() '''
+    main()'''

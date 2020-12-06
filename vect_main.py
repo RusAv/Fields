@@ -7,8 +7,6 @@ del_working = False
 con_clicks = 0
 del_clicks = 0
 pau_clicks = 0
-window_width = 610
-window_height = 610
 dt = 0.001
 paused = False
 
@@ -77,7 +75,7 @@ def paused_check():
                               bg = 'gray94')
 
 def connect(event):
-    global points, con_working, bonds
+    global points, con_working, bonds, flag
     x = event.x
     y = event.y
     for k in range (len(points)):
@@ -88,12 +86,15 @@ def connect(event):
                 bonds.append([k])
             elif len(bonds[-1]) == 1:
                 if bonds[-1][0] != k:
+                    flag = True
                     bonds[-1].append(k)
+                    Links[bonds[-1][0]][bonds[-1][1]] = 1
+                    Links[bonds[-1][1]][bonds[-1][0]] = 1
                 else:
                     del bonds[-1]
 
 def delete(event):
-    global points, con_working, bonds
+    global points, con_working, bonds, flag
     x = event.x
     y = event.y
     highlight_lines_between_points(del_working, points, bonds, x, y, screen)
@@ -101,8 +102,12 @@ def delete(event):
         if len(bonds[k]) == 2:
             dist = dist_mouse_to_line(k, points, bonds, x, y)
             if dist < max_dist and del_working:
+                flag = True
+                Links[bonds[k][0]][bonds[k][1]] = 0
+                Links[bonds[k][1]][bonds[k][0]] = 0
                 del bonds[k]
 
+flag = False
 root = Tk()
 mode_frame = Frame(root)
 mode_frame.pack(side=TOP)
@@ -132,11 +137,15 @@ pause_button = Button(button_frame, width = 25, text="Пауза",
 pause_button.pack(side=LEFT)
 mouse = Mouse()
 make_points()
+Re_calc_all()
 mode = 0
 Field, points, step, bodies = Grand_field(mode, dt)
-bonds = create_first_bonds(points, bodies)
+bonds = create_first_bonds(points, Links)
 
 while True:
+    if flag:
+        Re_calc_all()
+        flag = False
     if not paused:
         Field, points, step, bodies = Grand_field(mode, dt)
     vectors = Field[0]
@@ -146,6 +155,7 @@ while True:
     create_points(mouse, con_working, points, screen)
     create_lines_between_points(con_working, points, bonds, x, y, screen)
     highlight_lines_between_points(del_working, points, bonds, x, y, screen)
+    Links1 = Links
     try:
         root.bind('<Motion>', mouse.coords)
         if con_working:

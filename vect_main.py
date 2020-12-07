@@ -12,10 +12,11 @@ con_clicks = 0
 del_clicks = 0
 pau_clicks = 0
 dt = 0.001
+x_size = 300
+y_size = 300
 paused = False
 window_width = 610
 window_height = 610
-window_settings = [window_width, window_height, x_size, y_size]
 
 def electro():
     global mode
@@ -241,19 +242,24 @@ delete_button.pack(side=LEFT)
 pause_button = Button(button_frame, width = 20, text="Пауза",
                         command = paused_check)
 pause_button.pack(side=LEFT)
+scale = Scale(button2_frame, variable=x_size, from_=300,
+                  to=1200, orient=HORIZONTAL)
+scale.pack(side=LEFT)
 mouse = Mouse()
-make_points()
+make_points(x_size, y_size)
 Re_calc_all()
 mode = 0
-Field, points, step, bodies = Grand_field(mode, dt)
+Field, points, step, bodies = Grand_field(x_size, y_size, mode, dt)
 bonds = create_first_bonds(points, Links)
 
 while True:
+    y_size = x_size = scale.get()
+    window_settings = [window_width, window_height, x_size, y_size]
     if flag:
         Re_calc_all()
         flag = False
     if not paused:
-        Field, points, step, bodies = Grand_field(mode, dt)
+        Field, points, step, bodies = Grand_field(x_size, y_size, mode, dt)
     vectors = Field[0]
     x = mouse.x
     y = mouse.y

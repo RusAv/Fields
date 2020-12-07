@@ -398,12 +398,10 @@ class body_field:
 
 
 n = 7
-x_size = 300
-y_size = 300
 fig = plt.figure()
-ax = plt.subplot(111)
+'''ax = plt.subplot(111)
 ax.set_xlim(-x_size * 10, x_size * 10)
-ax.set_ylim(-y_size * 10, y_size * 10)
+ax.set_ylim(-y_size * 10, y_size * 10)'''
 field = Field()
 InBody = [0, 0, 0, -1,0,0,0]
 body_fi = body_field()
@@ -412,7 +410,7 @@ stepik = 0
 dt = 0.001
 
 
-def make_points():
+def make_points(x_size, y_size):
     global body_fi
     for i in range(0, n):
         field.append(
@@ -435,7 +433,7 @@ def return_points():
         point_s.append(p.coords)
     return point_s
         
-def return_field(flag,STEP):
+def return_field(x_size, y_size, flag,STEP):
     res = []
     '''
     flag=0 возвращает электрическое поле
@@ -462,7 +460,7 @@ def return_bodies():
         bodie.append(b.points)
     return bodie
 
-def Grand_field(mode, dt):
+def Grand_field(x_size, y_size, flag, dt):
     global  body_fi
     #шаг поля
     for i in range(9):
@@ -470,7 +468,7 @@ def Grand_field(mode, dt):
         body_fi.step(field, dt)
     STEP = 40
     Field=[]
-    Field.append(return_field(mode,STEP))
+    Field.append(return_field(x_size, y_size, flag, STEP))
     points=return_points()
     bodie=return_bodies()
     return Field, points, STEP, bodie
@@ -501,7 +499,7 @@ def Re_calc_all():
     print(InBody)
     body_fi.initial(InBody,field)
 
-def anim(steps):
+'''def anim(steps):
     global  body_fi
     for i in range(9):
         field.step(InBody, 0.001)
@@ -529,7 +527,7 @@ def main():
     # anim(1000)
     animate = FuncAnimation(fig, anim, interval=50, frames=300, blit=False)
     # animate.save('field3.gif')
-    plt.show()
+    plt.show()'''
 
 '''make_points()
 #res, point_s,step,bodie = Grand_field(dt)
@@ -537,6 +535,5 @@ def main():
 #print('dfdfb ')
 #print(point_s)
 Re_calc_all()
-
 if __name__ == '__main__':
     main()'''

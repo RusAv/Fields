@@ -157,7 +157,7 @@ class Point:
 class Body:
     def __init__(self, dim=3):
         '''
-        Создание объекта класса тела
+        Создание объекта класса тело
         '''
         self.points = []  # Инициализируется список точек в теле. Изначально он пустой
         self.mass = 0  # Масса тела равна нулю, т.к. в нём ещё нет точек
@@ -438,6 +438,9 @@ dt = 0.001
 
 
 def make_points(x_size, y_size):
+    '''
+    Случайным образом создаёт точки в окне. Вызывается при первоначальном открытии окна.
+    '''
     global body_fi
     for i in range(0, n):
         field.append(
@@ -455,18 +458,26 @@ def sigm(x):
     return 1 / (1 + 1.000055 ** (-x))
 
 def return_points():
+    '''
+    Функця возвращает набор корординат всех точек
+    '''
     point_s=[]
     for p in field.points:
         point_s.append(p.coords)
     return point_s
         
-def return_field(x_size, y_size, flag,STEP):
+def return_field(x_size, y_size, flag, STEP):
+    '''
+    Функция возвращает набор: (длина вектора по х, длина вектора по у, градиент его цвета) 
+    для всех точек плоскости с шагом в STEP.
+    При этом возращаются вектора еденичной длины, а от длины исходного вектора напряженности поля зависит градиент цвета   
+
+    flag = 0: возвращает электрическое поле
+    flag = 1: возвращает гравитационное поле
+    flag = 2: возвращает магнитное поле
+    '''
+
     res = []
-    '''
-    flag=0 возвращает электрическое поле
-    flag=1 возвращает гравитационное поле
-    flag=2 возвращает магнитное поле
-    '''
     for x in np.arange(-x_size, x_size, STEP):
         for y in np.arange(-y_size, y_size, STEP):
             # print(x,'  ',y)
@@ -482,16 +493,27 @@ def return_field(x_size, y_size, flag,STEP):
     return res
 
 def return_bodies():
+    '''
+    Возращает набор множеств точек всех тел, 
+    т.е. список списков, где каждый вложенный список - точки данного тела
+    '''
     bodie=[]
     for b in body_fi.bodies:
         bodie.append(b.points)
     return bodie
 
 def Grand_field(x_size, y_size, flag, dt):
+    '''
+    Эта функция возвращает:
+    1) Field - набор векторов напряженности
+    2) points - набор координат всех точек
+    3) STEP - шаг, по которому было рассчитано Field
+    4) bodie - набор всех тел, где каждое тело - набор точек, из которых оно состоит
+    '''
     global  body_fi
     #шаг поля
     for i in range(9):
-        field.step(InBody, dt)
+        field.step(InBody, dt)  # NOTE: Что это такое? Почему 9 раз нужно это сделать?
         body_fi.step(field, dt)
     STEP = 40
     Field=[]
@@ -501,13 +523,13 @@ def Grand_field(x_size, y_size, flag, dt):
     return Field, points, STEP, bodie
 
 
-def DFS(vertice,it):
-    count=0
-    InBody[vertice]=it
+def DFS(vertice, it):
+    count = 0
+    InBody[vertice] = it
     for i in range(len(Links[vertice])):
-        if i!=vertice and Links[i][vertice]==1 and InBody[i]==-2:
-            count+=DFS(i,it)
-    count+=1
+        if i != vertice and Links[i][vertice] == 1 and InBody[i] == -2:
+            count += DFS(i, it)
+    count += 1
     return count
 
 def Re_calc_Links():

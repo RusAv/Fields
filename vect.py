@@ -333,7 +333,7 @@ class Field:
 
     def step(self, InBody, dt):
         '''
-        ...
+        Изменяет значения координат и скорости для каждой точке в теле
         '''
         for i in range(len(self.points)):
             p = self.points[i]
@@ -347,16 +347,23 @@ class Field:
 
 class body_field:
     def __init__(self):
+        '''
+        Создание объекта класса body_field, который отвечает за перемещение тел в поле внешних сил.
+        Подразумевается наличие единственного объекта данного класса
+        '''  # TODO: Уточнить, действительно ли обеъкт этого лкасса один
         self.bodies = []
 
     def append(self, body):
+        '''
+        Добавление тела в список всех существующих тел
+        '''
         self.bodies.append(body)
 
     def initial(self, in_body, field):
         '''
-        Тут происходит создание поля по массиву в котором каждой точке сопоставлен номер тела, в котором она состоит
-        Также вычисляютсю параметры такого тела
-        Вызов этой функции происходит каждый раз когда меняется поле
+        Тут происходит создание поля по массиву в котором каждой точке сопоставлен номер тела, в котором она состоит.
+        Также вычисляютсю параметры такого тела.
+        Вызов этой функции происходит каждый раз когда меняется поле.
         '''
         l = max(in_body) + 1
         self.bodies = [Body() for i in range(l)]
@@ -366,6 +373,9 @@ class body_field:
             body.calc_params()
 
     def change_params(self, field, dt):
+        '''
+        Вычисляет, какие силы действуют на каждое тело посредством суммирования сил, действиующих на каждую точку тела
+        '''
         for body in self.bodies:
             forces = [field.El_intensity(body.points[i].coords, body.points) * body.points[i].q +
                       field.Gr_intensity(body.points[i].coords, body.points) * body.points[i].mass
@@ -374,6 +384,9 @@ class body_field:
             body.acer(forces)
 
     def move_points(self, dt):
+        '''
+        Изменяет положение всех точек в теле согласно движению тела как целого
+        '''
         for body in self.bodies:
             for p in body.points:
                 s = p.coords - body.center
@@ -382,20 +395,28 @@ class body_field:
             body.move(dt)
 
     def speed_points(self, dt):
+        '''
+        Изменяет скорости всех точек тела согласно движению тела как целого        
+        '''
         for body in self.bodies:
             body.accelerate(dt)
             for p in body.points:
                 s = p.coords - body.center
-                if abs(s)<1: print(abs(s),'   ',body.center)  # TODO: Удалить в самом конце
+                if abs(s) <1: print(abs(s),'   ',body.center)  # TODO: Удалить в самом конце
                 p.speed = body.speed + \
                           s.perp(Vector(0,0,1)) * \
                           (body.omega * abs(s) * (1 / abs(s.perp(Vector(0,0,1)))))
                 
     def step(self, field, dt):
+        '''
+        Вызывают методы изменения параметров поля (его напряженности), изменения положения точек всех тел и их скоростей
+        '''
         self.change_params(field, dt)
         self.move_points(dt)
         self.speed_points(dt)
 
+
+# TODO: Что это такое??? Всё, что не нужно, удалите, пожалуйста. Какие-то массивы. Просто страшно смотреть...   
 
 n = 7
 fig = plt.figure()
@@ -405,7 +426,13 @@ ax.set_ylim(-y_size * 10, y_size * 10)'''
 field = Field()
 InBody = [0, 0, 0, -1,0,0,0]
 body_fi = body_field()
-Links=[[0,0,0,1,0,0,0],[0,0,0,1,0,0,0],[0,0,0,0,1,1,1],[1,1,0,0,0,0,0],[0,0,1,0,0,0,0],[0,0,1,0,0,0,0],[0,0,1,0,0,1,1]]
+Links=[ [0,0,0,1,0,0,0],
+        [0,0,0,1,0,0,0],
+        [0,0,0,0,1,1,1],
+        [1,1,0,0,0,0,0],
+        [0,0,1,0,0,0,0],
+        [0,0,1,0,0,0,0],
+        [0,0,1,0,0,1,1] ]
 stepik = 0
 dt = 0.001
 

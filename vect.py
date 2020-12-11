@@ -419,10 +419,6 @@ class body_field:
 # TODO: Что это такое??? Всё, что не нужно, удалите, пожалуйста. Какие-то массивы. Просто страшно смотреть...   
 
 n = 7
-fig = plt.figure()
-'''ax = plt.subplot(111)
-ax.set_xlim(-x_size * 10, x_size * 10)
-ax.set_ylim(-y_size * 10, y_size * 10)'''
 field = Field()
 InBody = [0, 0, 0, -1,0,0,0]
 body_fi = body_field()
@@ -489,7 +485,7 @@ def return_field(x_size, y_size, flag, STEP):
                 vec = field.Mg_intensity(Vector(x, y, 0))
             grad = abs(vec)
             vec = vec * (STEP * (1 / abs(vec)))
-            res.append(([x - vec[0] / 2, x + vec[0] / 2], [y - vec[1] / 2, y + vec[1] / 2], grad))
+            res.append(([x - vec[0]/2, x + vec[0]/2], [y - vec[1]/2, y + vec[1]/2], grad))
     return res
 
 def return_bodies():
@@ -497,7 +493,7 @@ def return_bodies():
     Возращает набор множеств точек всех тел, 
     т.е. список списков, где каждый вложенный список - точки данного тела
     '''
-    bodie=[]
+    bodie = []
     for b in body_fi.bodies:
         bodie.append(b.points)
     return bodie
@@ -516,10 +512,10 @@ def Grand_field(x_size, y_size, flag, dt):
         field.step(InBody, dt)  # NOTE: Что это такое? Почему 9 раз нужно это сделать?
         body_fi.step(field, dt)
     STEP = 40
-    Field=[]
+    Field = []
     Field.append(return_field(x_size, y_size, flag, STEP))
-    points=return_points()
-    bodie=return_bodies()
+    points = return_points()
+    bodie = return_bodies()
     return Field, points, STEP, bodie
 
 
@@ -533,56 +529,22 @@ def DFS(vertice, it):
     return count
 
 def Re_calc_Links():
-    global Links,InBody,body_fi
-    marker=0
-    InBody=[-2 for i in range(len(InBody))]
+    global Links, InBody, body_fi
+    marker = 0
+    InBody = [-2 for i in range(len(InBody))]
     for i in range(len(InBody)):
-        if InBody[i]==-2:
-                c=DFS(i,marker)
-                if c==1:
-                    InBody[i]=-1
-                else:marker+=1
+        if InBody[i] == -2:
+                c = DFS(i, marker)
+                if c == 1:
+                    InBody[i] = -1
+                else: 
+                    marker += 1
 
 def Re_calc_all():
     Re_calc_Links()
     print(InBody)
-    body_fi.initial(InBody,field)
+    body_fi.initial(InBody, field)
 
-'''def anim(steps):
-    global  body_fi
-    for i in range(9):
-        field.step(InBody, 0.001)
-        body_fi.step(field, 0.001)
-    res = []
-    STEP = 20
-    for x in np.arange(-x_size, x_size, STEP):
-        for y in np.arange(-y_size, y_size, STEP):
-            # print(x,'  ',y)
-            vec = field.Mg_intensity(Vector(x, y, 0))
-            grad = abs(vec)
-            vec = vec * (STEP * (1 / abs(vec)))
-            res.append(([x - vec[0] / 2, x + vec[0] / 2], [y - vec[1] / 2, y + vec[1] / 2], grad))
-    ax.clear()
-    ax.set_xlim(-x_size, x_size)
-    ax.set_ylim(-y_size, y_size)
-    lines = []
-    for r in res:
-        lines.append(ax.plot(r[0], r[1], color=(sigm(r[2]), 0.1, 0.8 * (1 - sigm(r[2])))))
 
-    return lines
-
-def main():
-    steps = 10
-    # anim(1000)
-    animate = FuncAnimation(fig, anim, interval=50, frames=300, blit=False)
-    # animate.save('field3.gif')
-    plt.show()'''
-
-'''make_points()
-#res, point_s,step,bodie = Grand_field(dt)
-#print(res)
-#print('dfdfb ')
-#print(point_s)
-Re_calc_all()
 if __name__ == '__main__':
-    main()'''
+    print("This module is not for direct call")

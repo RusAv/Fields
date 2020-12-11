@@ -327,8 +327,8 @@ class Field:
                 if vect % p.coords < 10 ** (-9):
                     continue
                 inten = inten + (p.speed / (p.coords - vect)) * (Field.mu_0 / abs(p.coords - vect) ** 3)
-        inten[1]=0
-        inten[0]=0
+        inten[1] = 0
+        inten[0] = 0
         return inten
 
     def step(self, InBody, dt):
@@ -427,8 +427,8 @@ Links=[ [0,0,0,1,0,0,0],
         [0,0,0,0,1,1,1],
         [1,1,0,0,0,0,0],
         [0,0,1,0,0,0,0],
-        [0,0,1,0,0,0,0],
-        [0,0,1,0,0,1,1] ]
+        [0,0,1,0,0,0,1],
+        [0,0,1,0,0,1,0] ]
 stepik = 0
 dt = 0.001
 

@@ -24,12 +24,14 @@ def electro():
     electro_button.config(bg='cyan')
     magnet_button.config(bg='gray94')
     gravit_button.config(bg='gray94')
+
 def magnet():
     global mode
     mode = 2
     electro_button.config(bg='gray94')
     magnet_button.config(bg='deep sky blue')
     gravit_button.config(bg='gray94')
+
 def gravit():
     global mode
     mode = 1
@@ -203,6 +205,25 @@ def delete(event):
                 Links[bonds[k][0]][bonds[k][1]] = 0
                 Links[bonds[k][1]][bonds[k][0]] = 0
                 del bonds[k]
+'''
+def create_point(event):
+    global points, con_working, bonds, flag
+    x = event.x
+    y = event.y
+
+    if add_working:
+        InBody.append(0)
+        for i in range(0, n):
+            field.append(
+                Point(Vector(x, y, 0), Vector(0, 0, 0), 10,
+                      Vector(0, 0, 0), 1))
+        body_fi.initial(InBody, field)
+        
+        for i in range(len(Links)):
+            Links[i].append(0)
+        Links.append([0 for i in range(len(Links) + 1)])
+        print (len(points))
+'''
 
 flag = False
 root = Tk()
@@ -282,6 +303,9 @@ while True:
             root.bind('<Button-1>', connect)
         elif del_working:
             root.bind('<Button-1>', delete)
+        elif add_working:
+            root.bind('<Button-1>', create_point)
+
     except TclError:
         break
     root.update()

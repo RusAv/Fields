@@ -2,31 +2,108 @@ from vect import *
 from vect_interface import *
 
 # CONSTANTS
+add_working = False
+rem_working = False
 con_working = False
 del_working = False
+add_clicks = 0
+rem_clicks = 0
 con_clicks = 0
 del_clicks = 0
 pau_clicks = 0
 dt = 0.001
+x_size = 300
+y_size = 300
 paused = False
 window_width = 610
 window_height = 610
-window_settings = [window_width, window_height, x_size, y_size]
 
 def electro():
     global mode
     mode = 0
+    electro_button.config(bg='cyan')
+    magnet_button.config(bg='gray94')
+    gravit_button.config(bg='gray94')
+
 def magnet():
     global mode
     mode = 2
+    electro_button.config(bg='gray94')
+    magnet_button.config(bg='deep sky blue')
+    gravit_button.config(bg='gray94')
+
 def gravit():
     global mode
     mode = 1
+    electro_button.config(bg='gray94')
+    magnet_button.config(bg='gray94')
+    gravit_button.config(bg='SlateBlue1')
 
+def add_check():
+    global add_clicks, rem_clicks, con_clicks, del_clicks
+    global add_working, rem_working, con_working, del_working
+    add_clicks += 1
+    if not rem_working and not con_working and not del_working:
+        if add_clicks % 2 == 1:
+            add_button.config(text="Режим добавления точек: выключить",
+                              bg = 'orange')
+            add_working = True
+        else:
+            add_button.config(text="Режим добавления точек: включить",
+                              bg = 'gray94')
+            add_working = False
+    elif (rem_working or con_working or del_working) and add_clicks % 2 == 1:
+        add_working = True
+        add_button.config(text="Режим добавления точек: выключить",
+                              bg = 'orange')
+        con_working = False
+        con_clicks = 0
+        connect_button.config(text="Режим соединения: включить",
+                              bg = 'gray94')
+        del_working = False
+        del_clicks = 0
+        delete_button.config(text="Режим удаления: включить",
+                          bg = 'gray94')
+        rem_working = False
+        rem_clicks = 0
+        remove_button.config(text="Режим удаления точек: включить",
+                          bg = 'gray94')
+
+def rem_check():
+    global add_clicks, rem_clicks, con_clicks, del_clicks
+    global add_working, rem_working, con_working, del_working
+    rem_clicks += 1
+    if not add_working and not con_working and not del_working:
+        if rem_clicks % 2 == 1:
+            remove_button.config(text="Режим удаления точек: выключить",
+                              bg = 'purple')
+            rem_working = True
+        else:
+            remove_button.config(text="Режим удаления точек: включить",
+                              bg = 'gray94')
+            rem_working = False
+    elif (add_working or con_working or del_working) and rem_clicks % 2 == 1:
+        rem_working = True
+        remove_button.config(text="Режим удаления точек: выключить",
+                              bg = 'purple')
+        con_working = False
+        con_clicks = 0
+        connect_button.config(text="Режим соединения: включить",
+                              bg = 'gray94')
+        del_working = False
+        del_clicks = 0
+        delete_button.config(text="Режим удаления: включить",
+                          bg = 'gray94')
+        add_working = False
+        add_clicks = 0
+        add_button.config(text="Режим добавления точек: включить",
+                          bg = 'gray94')
+        
 def connect_check():
-    global con_clicks, del_clicks, con_working, del_working, bonds
+    global add_clicks, rem_clicks, con_clicks, del_clicks
+    global add_working, rem_working, con_working, del_working, bonds
     con_clicks += 1
-    if not del_working:
+    if not rem_working and not del_working and not add_working:
         if con_clicks % 2 == 1:
             connect_button.config(text="Режим соединения: выключить",
                               bg = 'red')
@@ -35,19 +112,28 @@ def connect_check():
             connect_button.config(text="Режим соединения: включить",
                               bg = 'gray94')
             con_working = False
-    elif del_working and con_clicks % 2 == 1:
+    elif (rem_working or del_working or add_working) and con_clicks % 2 == 1:
+        con_working = True
         connect_button.config(text="Режим соединения: выключить",
                               bg = 'red')
+        add_working = False
+        add_clicks = 0
+        add_button.config(text="Режим добавления точек: включить",
+                              bg = 'gray94')
         del_working = False
         del_clicks = 0
-        delete_button.config(text="Режим удаления: выключить",
-                              bg = 'gray94')
-        con_working = True
+        delete_button.config(text="Режим удаления: включить",
+                          bg = 'gray94')
+        rem_working = False
+        rem_clicks = 0
+        remove_button.config(text="Режим удаления точек: включить",
+                          bg = 'gray94')
 
 def delete_check():
-    global con_clicks, del_clicks, con_working, del_working, bonds
+    global add_clicks, rem_clicks, con_clicks, del_clicks
+    global add_working, rem_working, con_working, del_working
     del_clicks += 1
-    if not con_working:
+    if not rem_working and not con_working and not add_working:
         if del_clicks % 2 == 1:
             delete_button.config(text="Режим удаления: выключить",
                               bg = 'blue')
@@ -56,13 +142,22 @@ def delete_check():
             delete_button.config(text="Режим удаления: включить",
                               bg = 'gray94')
             del_working = False
-    elif con_working and del_clicks % 2 == 1:
-        connect_button.config(text="Режим соединения: включить",
+    elif (rem_working or con_working or add_working) and del_clicks % 2 == 1:
+        del_working = True
+        delete_button.config(text="Режим удаления: выключить",
+                              bg = 'red')
+        add_working = False
+        add_clicks = 0
+        add_button.config(text="Режим добавления точек: включить",
                               bg = 'gray94')
         con_working = False
         con_clicks = 0
-        delete_button.config(text="Режим удаления: выключить",
-                              bg = 'blue')
+        connect_button.config(text="Режим соединения: включить",
+                          bg = 'gray94')
+        rem_working = False
+        rem_clicks = 0
+        remove_button.config(text="Режим удаления точек: включить",
+                          bg = 'gray94')
         del_working = True
 
 def paused_check():
@@ -110,13 +205,32 @@ def delete(event):
                 Links[bonds[k][0]][bonds[k][1]] = 0
                 Links[bonds[k][1]][bonds[k][0]] = 0
                 del bonds[k]
+'''
+def create_point(event):
+    global points, con_working, bonds, flag
+    x = event.x
+    y = event.y
+
+    if add_working:
+        InBody.append(0)
+        for i in range(0, n):
+            field.append(
+                Point(Vector(x, y, 0), Vector(0, 0, 0), 10,
+                      Vector(0, 0, 0), 1))
+        body_fi.initial(InBody, field)
+        
+        for i in range(len(Links)):
+            Links[i].append(0)
+        Links.append([0 for i in range(len(Links) + 1)])
+        print (len(points))
+'''
 
 flag = False
 root = Tk()
 mode_frame = Frame(root)
 mode_frame.pack(side=TOP)
 electro_button = Button(mode_frame, width = 25, text="Электрическое поле",
-                        command = electro)
+                        command = electro, bg = 'cyan')
 electro_button.pack(side=LEFT)
 magnet_button = Button(mode_frame, width = 25, text="Магнитное поле",
                        command = magnet)
@@ -130,28 +244,43 @@ screen = Canvas(root_frame, width=window_width, height=window_height, bg="white"
 screen.pack(side=LEFT)
 button_frame = Frame(root)
 button_frame.pack(side=TOP)
-connect_button = Button(button_frame, width = 25, text="Режим соединения: включить",
+button2_frame = Frame(root)
+button2_frame.pack(side=TOP)
+add_button = Button(button2_frame, width = 37,
+                    text="Режим добавления точек: включить",
+                    command = add_check)
+add_button.pack(side=LEFT)
+remove_button = Button(button2_frame, width = 37,
+                    text="Режим удаления точек: включить",
+                    command = rem_check)
+remove_button.pack(side=LEFT)
+connect_button = Button(button_frame, width = 24, text="Режим соединения: включить",
                         command = connect_check)
 connect_button.pack(side=LEFT)
-delete_button = Button(button_frame, width = 25, text="Режим удаления: включить",
+delete_button = Button(button_frame, width = 22, text="Режим удаления: включить",
                         command = delete_check)
 delete_button.pack(side=LEFT)
-pause_button = Button(button_frame, width = 25, text="Пауза",
+pause_button = Button(button_frame, width = 20, text="Пауза",
                         command = paused_check)
 pause_button.pack(side=LEFT)
+scale = Scale(button2_frame, variable=x_size, from_=300,
+                  to=1200, orient=HORIZONTAL)
+scale.pack(side=LEFT)
 mouse = Mouse()
-make_points()
+make_points(x_size, y_size)
 Re_calc_all()
 mode = 0
-Field, points, step, bodies = Grand_field(mode, dt)
+Field, points, step, bodies = Grand_field(x_size, y_size, mode, dt)
 bonds = create_first_bonds(points, Links)
 
 while True:
+    y_size = x_size = scale.get()
+    window_settings = [window_width, window_height, x_size, y_size]
     if flag:
         Re_calc_all()
         flag = False
     if not paused:
-        Field, points, step, bodies = Grand_field(mode, dt)
+        Field, points, step, bodies = Grand_field(x_size, y_size, mode, dt)
     vectors = Field[0]
     x = mouse.x
     y = mouse.y
@@ -174,6 +303,9 @@ while True:
             root.bind('<Button-1>', connect)
         elif del_working:
             root.bind('<Button-1>', delete)
+        elif add_working:
+            root.bind('<Button-1>', create_point)
+
     except TclError:
         break
     root.update()

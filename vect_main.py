@@ -227,8 +227,18 @@ def create_point(event):
 '''
 
 
-flag = False
 root = Tk()
+
+
+def on_closing():
+    if messagebox.askyesno("Внимание!",
+                                "Вы пытаетесь покинуть виртуальный мир и возвратиться в реальный." + '\n' + \
+                                "Не забудьте, что РЕАЛЬНЫЕ гравитационные и магнитные поля могут Вас убить!" + '\n' + '\n' +\
+                                "Вы действительно хотите выйти?"):
+        root.destroy()
+
+
+flag = False
 messagebox.showinfo('Добро пожаловать!', 
 		'Данный продукт является результатом труда команды разработчиков DDR-crew.' + '\n' +'\n'+ \
                 'Авторы продукта не несут отсветсвенности за приченный пользоватлям ущерб здоровью или ущерб любого иного характера.' +'\n' + '\n' +\
@@ -237,6 +247,11 @@ messagebox.showinfo('Добро пожаловать!',
                 'Документация к использованию изложена в файлах "README.md" и "Documentaion.pdf".' + '\n' + '\n' +\
                 'Благодарим за то, что выбрали нас!'
 		)
+
+root.protocol("WM_DELETE_WINDOW", on_closing)
+
+root.title("Vecield")
+
 mode_frame = Frame(root)
 mode_frame.pack(side=TOP)
 electro_button = Button(mode_frame, width = 25, text="Электрическое поле",
@@ -323,3 +338,7 @@ while True:
         screen.delete('all')
     except TclError:
         break
+        messagebox.showwarning("Внимание!",
+                                "Вы покидаете виртуальный мир и возвращаетесь в реальный" + '\n' + \
+                                "Не забудьте, что РЕАЛЬНЫЕ гравитационные и магнитные поля могут Вас убить!" + '\n' + '\n' +\
+                                "Удачи!")

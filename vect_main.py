@@ -16,8 +16,8 @@ dt = 0.001
 x_size = 300
 y_size = 300
 paused = False
-window_width = 400
-window_height = 400
+window_width = 610
+window_height = 610
 
 def electro():
     global mode
@@ -211,7 +211,6 @@ def create_point(event):
     global points, con_working, bonds, flag
     x = event.x
     y = event.y
-
     if add_working:
         InBody.append(0)
         for i in range(0, n):
@@ -265,7 +264,7 @@ gravit_button = Button(mode_frame, width = 25, text="Гравитационно�
 gravit_button.pack(side=LEFT)
 root_frame = Frame(root)
 root_frame.pack(side=TOP)
-screen = Canvas(root_frame, width=window_width, height=window_height, bg="white")
+screen = Canvas(root_frame, width=window_width, height=window_height, bg="black")
 screen.pack(side=LEFT)
 button_frame = Frame(root)
 button_frame.pack(side=TOP)
@@ -295,7 +294,7 @@ mouse = Mouse()
 make_points(x_size, y_size)
 Re_calc_all()
 mode = 0
-Field, points, step, bodies = Grand_field(x_size, y_size, mode, dt)
+Field, points, step, bodies = Grand_field(x_size, y_size, dt)
 bonds = create_first_bonds(points, Links)
 
 while True:
@@ -305,15 +304,17 @@ while True:
         Re_calc_all()
         flag = False
     if not paused:
-        Field, points, step, bodies = Grand_field(x_size, y_size, mode, dt)
-    vectors = Field[0]
+        Field, points, step, bodies = Grand_field(x_size, y_size, dt)
     x = mouse.x
     y = mouse.y
     if mode == 0:
+        vectors = Field[0]
         create_electro_vectors(vectors, window_settings, screen)
     elif mode == 1:
+        vectors = Field[1]
         create_gravit_vectors(vectors, window_settings, screen)
     else:
+        vectors = Field[2]
         create_magnet_squares(vectors, x_size, y_size, step, window_settings,
                               screen)
     create_points(mouse, con_working, points,

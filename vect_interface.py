@@ -30,13 +30,13 @@ def sigm_mg(x):
 
 def scale_x(x, window_settings):
     '''масштабирование по горизонтальной оси'''
-    return (x*window_settings[0]/(2*window_settings[2]) +
-            window_settings[0]/2 + 15)
+    return ((x+22)*window_settings[0]/(2*window_settings[2]) +
+            window_settings[0]/2)
 
 def scale_y(x, window_settings):
     '''масштабирование по вертикальной оси'''
-    return (x*window_settings[1]/(2*window_settings[3]) +
-            window_settings[1]/2 + 15)
+    return ((x+22)*window_settings[1]/(2*window_settings[3]) +
+            window_settings[1]/2)
 
 def create_electro_vectors(vectors, window_settings, screen):
     '''здесь рисуются вектора электрического поля, которые передаются из массива vectors'''
@@ -48,7 +48,7 @@ def create_electro_vectors(vectors, window_settings, screen):
         pointy2 = scale_y(vectors[k][1][1], window_settings)
         color = '#' + (hex(int(sigm_el(vectors[k][2])*255))[2:].ljust(2, '0') + '1a' +
                        hex(int((1 - sigm_el(vectors[k][2]))*204))[2:].ljust(2, '0'))
-        screen.create_line(pointx1, pointy1, pointx2, pointy2, width = 1, fill = color)
+        screen.create_line(pointx1, pointy1, pointx2, pointy2, width = 2, fill = color)
         '''стрелочка на конце'''
         length = dist_point_to_point(pointx1, pointy1, pointx2, pointy2)
         if length > 0:
@@ -71,7 +71,7 @@ def create_gravit_vectors(vectors, window_settings, screen):
         pointy2 = scale_y(vectors[k][1][1], window_settings)
         color = '#' + (hex(int(sigm_gr(vectors[k][2])*255))[2:].ljust(2, '0') + '1a' +
                        hex(int((1 - sigm_gr(vectors[k][2]))*204))[2:].ljust(2, '0'))
-        screen.create_line(pointx1, pointy1, pointx2, pointy2, width = 1, fill = color)
+        screen.create_line(pointx1, pointy1, pointx2, pointy2, width = 2, fill = color)
         '''стрелочка на конце'''
         length = dist_point_to_point(pointx1, pointy1, pointx2, pointy2)
         if length > 0:
@@ -93,7 +93,7 @@ def create_points(mouse, con_working, points, window_settings,
         pointx = scale_x(points[k][0], window_settings)
         pointy = scale_y(points[k][1], window_settings)
         screen.create_oval(pointx - 4, pointy - 4, pointx + 4,
-                            pointy + 4, fill="orange")
+                            pointy + 4, fill="cyan")
         if (x - pointx)**2 + (y - pointy)**2 < sense**2 and con_working:
             screen.create_oval(pointx - sense, pointy - sense, pointx + sense,
                                 pointy + sense, fill="yellow")
@@ -131,11 +131,11 @@ def create_lines_between_points(con_working, points, bonds, x, y,
             pointy1 = scale_y(points[bonds[k][0]][1], window_settings)
             pointx2 = scale_x(points[bonds[k][1]][0], window_settings)
             pointy2 = scale_y(points[bonds[k][1]][1], window_settings)
-            screen.create_line(pointx1, pointy1, pointx2, pointy2)
+            screen.create_line(pointx1, pointy1, pointx2, pointy2, fill = 'cyan', width = 2)
         elif len(bonds[k]) == 1 and con_working:
             pointx1 = scale_x(points[bonds[k][0]][0], window_settings)
             pointy1 = scale_y(points[bonds[k][0]][1], window_settings)
-            screen.create_line(pointx1, pointy1, x, y)
+            screen.create_line(pointx1, pointy1, x, y, fill = 'cyan', width = 2)
 
 def dist_mouse_to_line(k, points, bonds, x, y, window_settings):
     '''вычисление расстояния от курсора до ребра'''
@@ -188,4 +188,6 @@ def create_magnet_squares(vectors, x_size, y_size, step, window_settings,
                                 x_center + step/2+1, y_center + step/2+1,
                                 x_center - step/2-1, y_center + step/2+1],
                                 fill = color)
-                                  
+
+if __name__ == '__main__':
+    print("This module is not for direct call")

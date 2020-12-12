@@ -467,7 +467,6 @@ def return_field(x_size, y_size, flag, STEP):
     Функция возвращает набор: (длина вектора по х, длина вектора по у, градиент его цвета) 
     для всех точек плоскости с шагом в STEP.
     При этом возращаются вектора еденичной длины, а от длины исходного вектора напряженности поля зависит градиент цвета   
-
     flag = 0: возвращает электрическое поле
     flag = 1: возвращает гравитационное поле
     flag = 2: возвращает магнитное поле
@@ -498,7 +497,7 @@ def return_bodies():
         bodie.append(b.points)
     return bodie
 
-def Grand_field(x_size, y_size, flag, dt):
+def Grand_field(x_size, y_size, dt):
     '''
     Эта функция возвращает:
     1) Field - набор векторов напряженности
@@ -513,7 +512,8 @@ def Grand_field(x_size, y_size, flag, dt):
         body_fi.step(field, dt)
     STEP = 40
     Field = []
-    Field.append(return_field(x_size, y_size, flag, STEP))
+    for flag in range (3):
+        Field.append(return_field(x_size, y_size, flag, STEP))
     points = return_points()
     bodie = return_bodies()
     return Field, points, STEP, bodie

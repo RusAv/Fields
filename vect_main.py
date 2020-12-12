@@ -1,5 +1,6 @@
 from vect import *
 from vect_interface import *
+from tkinter import messagebox
 
 # CONSTANTS
 add_working = False
@@ -225,8 +226,17 @@ def create_point(event):
         print (len(points))
 '''
 
+
 flag = False
 root = Tk()
+messagebox.showinfo('Добро пожаловать!', 
+		'Данный продукт является результатом труда команды разработчиков DDR-crew.' + '\n' +'\n'+ \
+                'Авторы продукта не несут отсветсвенности за приченный пользоватлям ущерб здоровью или ущерб любого иного характера.' +'\n' + '\n' +\
+                'Данный продукт является общественным достоянием, поэтому разрешено копирование, хранение и использование \
+                исходных материалов в любых целях.' + '\n' + '\n' +\
+                'Документация к использованию изложена в файлах "README.md" и "Documentaion.pdf".' + '\n' + '\n' +\
+                'Благодарим за то, что выбрали нас!'
+		)
 mode_frame = Frame(root)
 mode_frame.pack(side=TOP)
 electro_button = Button(mode_frame, width = 25, text="Электрическое поле",

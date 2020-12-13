@@ -16,8 +16,8 @@ dt = 0.001
 x_size = 300
 y_size = 300
 paused = False
-window_width = 610
-window_height = 610
+window_width = 400
+window_height = 400
 
 def electro():
     global mode
@@ -211,7 +211,7 @@ def create_point(event):
     x = event.x
     y = event.y
     if add_working:
-        add_point(x,y,x_size,y_size)
+        add_point(x , y, x_size, y_size)
 
 
 

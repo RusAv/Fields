@@ -432,7 +432,6 @@ Links=[ [0,0,0,1,0,0,0],
 stepik = 0
 dt = 0.001
 
-
 def make_points(x_size, y_size):
     '''
     Случайным образом создаёт точки в окне. Вызывается при первоначальном открытии окна.
@@ -460,6 +459,7 @@ def return_points():
     point_s=[]
     for p in field.points:
         point_s.append(p.coords)
+        #print(p.coords)
     return point_s
         
 def return_field(x_size, y_size, flag, STEP):
@@ -540,11 +540,24 @@ def Re_calc_Links():
                 else: 
                     marker += 1
 
+
+
 def Re_calc_all():
     Re_calc_Links()
-    print(InBody)
+    #print(InBody)
     body_fi.initial(InBody, field)
 
+def add_point(x,y,x_size,y_size):
+    global n,Links,InBody,field
+    print(x,y)
+    InBody.append(-1)
+    field.append(
+        Point(Vector(x-x_size-20, y-y_size-20, 0), Vector(0, 0, 0), 10,
+              Vector(0, 0, 0), 1))
+    n += 1
+    for i in range(len(Links)):
+        Links[i].append(0)
+    Links.append([0 for i in range(len(Links) + 1)])
 
 if __name__ == '__main__':
     print("This module is not for direct call")

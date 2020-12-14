@@ -33,10 +33,18 @@ def scale_x(x, window_settings):
     return ((x+22)*window_settings[0]/(2*window_settings[2]) +
             window_settings[0]/2)
 
-def scale_y(x, window_settings):
+def scale_y(y, window_settings):
     '''масштабирование по вертикальной оси'''
-    return ((x+22)*window_settings[1]/(2*window_settings[3]) +
+    return ((y+22)*window_settings[1]/(2*window_settings[3]) +
             window_settings[1]/2)
+
+def scale_x_back(x, window_settings):
+    '''вычисление глобальной горизонтальной координаты по экранной'''
+    return ((2*x - window_settings[0])*window_settings[2]/window_settings[0] - 22)
+
+def scale_y_back(y, window_settings):
+    '''вычисление глобальной вертикальной координаты по экранной'''
+    return ((2*y - window_settings[1])*window_settings[3]/window_settings[1] - 22)
 
 def create_electro_vectors(vectors, window_settings, screen):
     '''здесь рисуются вектора электрического поля, которые передаются из массива vectors'''

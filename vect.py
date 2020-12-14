@@ -497,7 +497,7 @@ def return_bodies():
         bodie.append(b.points)
     return bodie
 
-def Grand_field(x_size, y_size, dt):
+def Grand_field(x_size, y_size, flag, paused, dt):
     '''
     Эта функция возвращает:
     1) Field - набор векторов напряженности
@@ -506,13 +506,16 @@ def Grand_field(x_size, y_size, dt):
     4) bodie - набор всех тел, где каждое тело - набор точек, из которых оно состоит
     '''
     global  body_fi
-    #шаг поля
-    for i in range(9):
-        field.step(InBody, dt)  # NOTE: Что это такое? Почему 9 раз нужно это сделать?
-        body_fi.step(field, dt)
     STEP = 40
     Field = []
-    for flag in range (3):
+    if paused:
+        for i in range (3):
+            Field.append(return_field(x_size, y_size, i, STEP))
+    else:
+        #шаг поля
+        for i in range(9):
+            field.step(InBody, dt)  # NOTE: Что это такое? Почему 9 раз нужно это сделать?
+            body_fi.step(field, dt)
         Field.append(return_field(x_size, y_size, flag, STEP))
     points = return_points()
     bodie = return_bodies()
@@ -547,12 +550,20 @@ def Re_calc_all():
     #print(InBody)
     body_fi.initial(InBody, field)
 
+<<<<<<< HEAD
 def add_point(x, y, x_size, y_size):
     global n, Links, InBody, field
     #print(x,y)
     InBody.append(-1)
     field.append(
         Point(Vector(x - x_size - 20, y - y_size - 20, 0), Vector(0, 0, 0), 10,
+=======
+def add_point(x,y,x_size,y_size):
+    global n,Links,InBody,field
+    InBody.append(-1)
+    field.append(
+        Point(Vector(x, y, 0), Vector(0, 0, 0), 10,
+>>>>>>> ab25cc0f18cbb438dd7c68bbbcafa0f6a7ea4d58
               Vector(0, 0, 0), 1))
     n += 1
     for i in range(len(Links)):

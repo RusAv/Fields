@@ -16,8 +16,8 @@ dt = 0.001
 x_size = 300
 y_size = 300
 paused = False
-window_width = 400
-window_height = 400
+window_width = 610
+window_height = 610
 
 def electro():
     global mode
@@ -208,10 +208,10 @@ def delete(event):
                 del bonds[k]
 
 def create_point(event):
-    x = event.x
-    y = event.y
-    if add_working:
-        add_point(x , y, x_size, y_size)
+    x = scale_x_back(event.x, window_settings)
+    y = scale_y_back(event.y, window_settings)
+    if add_working and event.widget == screen:
+        add_point(x, y, x_size, y_size)
 
 
 
@@ -283,7 +283,7 @@ mouse = Mouse()
 make_points(x_size, y_size)
 Re_calc_all()
 mode = 0
-Field, points, step, bodies = Grand_field(x_size, y_size, dt)
+Field, points, step, bodies = Grand_field(x_size, y_size, mode, paused, dt)
 bonds = create_first_bonds(points, Links)
 
 while True:
@@ -292,20 +292,29 @@ while True:
     if flag:
         Re_calc_all()
         flag = False
-    if not paused:
-        Field, points, step, bodies = Grand_field(x_size, y_size, dt)
     x = mouse.x
     y = mouse.y
-    if mode == 0:
-        vectors = Field[0]
-        create_electro_vectors(vectors, window_settings, screen)
-    elif mode == 1:
-        vectors = Field[1]
-        create_gravit_vectors(vectors, window_settings, screen)
+    Field, points, step, bodies = Grand_field(x_size, y_size, mode, paused, dt)
+    if paused:
+        if mode == 0:
+            vectors = Field[0]
+            create_electro_vectors(vectors, window_settings, screen)
+        elif mode == 1:
+            vectors = Field[1]
+            create_gravit_vectors(vectors, window_settings, screen)
+        else:
+            vectors = Field[2]
+            create_magnet_squares(vectors, x_size, y_size, step, window_settings,
+                                  screen)
     else:
-        vectors = Field[2]
-        create_magnet_squares(vectors, x_size, y_size, step, window_settings,
-                              screen)
+        vectors = Field[0]
+        if mode == 0:
+            create_electro_vectors(vectors, window_settings, screen)
+        elif mode == 1:
+            create_gravit_vectors(vectors, window_settings, screen)
+        else:
+            create_magnet_squares(vectors, x_size, y_size, step, window_settings,
+                                  screen)
     create_points(mouse, con_working, points,
                   window_settings, screen)
     create_lines_between_points(con_working, points, bonds, x, y,

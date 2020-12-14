@@ -547,12 +547,12 @@ def Re_calc_all():
     #print(InBody)
     body_fi.initial(InBody, field)
 
-def add_point(x,y,x_size,y_size):
-    global n,Links,InBody,field
-    print(x,y)
+def add_point(x, y, x_size, y_size):
+    global n, Links, InBody, field
+    #print(x,y)
     InBody.append(-1)
     field.append(
-        Point(Vector(x-x_size-20, y-y_size-20, 0), Vector(0, 0, 0), 10,
+        Point(Vector(x - x_size - 20, y - y_size - 20, 0), Vector(0, 0, 0), 10,
               Vector(0, 0, 0), 1))
     n += 1
     for i in range(len(Links)):

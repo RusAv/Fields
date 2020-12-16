@@ -772,7 +772,10 @@ def del_point(x, y, x_size, y_size):
             Links.pop(i)
             field.points.pop(i)
             n -= 1
-            Re_calc_all()
+            try:
+                Re_calc_all()
+            except ValueError:
+                pass
             break
 
 

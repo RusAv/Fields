@@ -641,15 +641,15 @@ class body_field:
 
 n = 7
 field = Field()
-InBody = [0, 0, 0, -1,0,0,0]
+InBody = [-1, 0, 0,0,0,0,0]
 body_fi = body_field()
-Links=[ [0,0,0,1,0,0,0],
-        [0,0,0,1,0,0,0],
-        [0,0,0,0,1,1,1],
-        [1,1,0,0,0,0,0],
+Links=[ [0,0,0,0,0,0,0],
         [0,0,1,0,0,0,0],
-        [0,0,1,0,0,0,1],
-        [0,0,1,0,0,1,0] ]
+        [0,0,1,0,0,0,0],
+        [0,0,1,0,0,0,0],
+        [0,0,1,0,0,0,0],
+        [0,0,1,0,0,0,0],
+        [0,0,1,0,0,0,0] ]
 stepik = 0
 dt = 0.001
 
@@ -788,7 +788,17 @@ def add_point(x,y,x_size,y_size):
 
 def del_point(x, y, x_size, y_size):
     global n, Links, InBody, field
-    In.body
+    for i in range(len(field.points)):
+        p=field.points[i]
+        if abs(p.coords-Vector(x,y,0))<0.01:
+            print(i)
+            InBody.pop(i)
+            for j in range(n):
+                Links[j].pop(i)
+            Links.pop(i)
+            field.points.pop(i)
+            Re_calc_all()
+            break
 
 
 if __name__ == '__main__':

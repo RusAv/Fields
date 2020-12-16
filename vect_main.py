@@ -44,8 +44,8 @@ dt = 0.001
 x_size = 300
 y_size = 300
 paused = False
-window_width = 400
-window_height = 400
+window_width = 610
+window_height = 610
 
 ending_message = "Вы покидаете виртуальный мир и возвращаетесь в реальный." + '\n' + \
                  "Не забудьте, что НАСТОЯЩИЕ гравитационные и электромагнитные поля могут Вас убить!" + '\n' + '\n' +\
@@ -419,29 +419,32 @@ scale = Scale(button2_frame, variable=x_size, from_=300,
 scale.pack(side=LEFT)
 
 
-mouse = Mouse()
-make_points(x_size, y_size)  # Первоначальная инициализация точек
+mouse = Mouse()  # Первоначальная инициализация точек
 
 # TODO: убрать первоначальное создание точек, т.к. мы можем их сами создавать теперь
 # TODO: Проблема в том, что сейчас он ругатся на пустой список точек
 # TODO: Не знаю, как это легко решить. Но можно хотя бы сократить кол-во создаваемых точек до одной и ставить её в центре
 # TODO: Но что делать, если пользователь удалит все точки. Опять возникнет ошибка
 # TODO: Так что проблема требует к себе пристального внимания
-
-Re_calc_all() 
 mode = 0  # Отвечает за тип отображаемого поля: 0 - электр., 1 - гравитационное, 2 - магнитное
-Field, points, step, bodies = Grand_field(x_size, y_size, mode, paused, dt)
-bonds = create_first_bonds(points, Links)
+bonds = []
 
 while True:
     y_size = x_size = scale.get()
     window_settings = [window_width, window_height, x_size, y_size]
     if flag:
-        Re_calc_all()
-        flag = False
+        try:
+            Re_calc_all()
+            flag = False
+        except ValueError:
+            pass
     x = mouse.x
     y = mouse.y
-    Field, points, step, bodies = Grand_field(x_size, y_size, mode, paused, dt)
+    try:
+        Field, points, step, bodies = Grand_field(x_size, y_size, mode, paused, dt)
+    except ZeroDivisionError:
+        Field = [[]]
+        points = []
     if paused:  # Прорисовка векторов всех полей в режиме паузы
         if mode == 0:
             vectors = Field[0]

@@ -91,7 +91,7 @@ def create_gravit_vectors(vectors, window_settings, screen):
             y_b = (B*x_b - C_new)/A
             screen.create_polygon([pointx2, pointy2, x_a, y_a, x_b, y_b], width = 1, fill = color)
         
-def create_points(mouse, con_working, points, window_settings,
+def create_points(mouse, con_working, rem_working, points, window_settings,
                   screen):
     '''здесь рисуются точки, передающиеся в массиве points, также
        рисуются точки покрупнее при наведении на них мыши'''
@@ -102,7 +102,7 @@ def create_points(mouse, con_working, points, window_settings,
         pointy = scale_y(points[k][1], window_settings)
         screen.create_oval(pointx - 4, pointy - 4, pointx + 4,
                             pointy + 4, fill="cyan")
-        if (x - pointx)**2 + (y - pointy)**2 < sense**2 and con_working:
+        if (x - pointx)**2 + (y - pointy)**2 < sense**2 and (con_working or rem_working):
             screen.create_oval(pointx - sense, pointy - sense, pointx + sense,
                                 pointy + sense, fill="yellow")
 

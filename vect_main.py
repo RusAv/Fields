@@ -4,11 +4,8 @@
     
     но детальном управлении им - 
     для этих целей существует модуль vect_interface, 
-
 реализации взаимодействия с пользователем и реализации взаимоействия между 
 модулями вычислительной (vect) и грфаической (vect_interface) частей.
-
-
 Функции:
     # Обработка нажатия на кнопки:
     electro() - электричсекое поле
@@ -27,7 +24,6 @@
     
     ###
     on_cloing() - обработка выхода из программы
-
 '''
 
 from vect import *
@@ -255,7 +251,7 @@ def connect(event):
     for k in range (len(points)):
         pointx = scale_x(points[k][0], window_settings)
         pointy = scale_y(points[k][1], window_settings)
-        if (x - pointx)**2 + (y - pointy)**2 < sense**2 and con_working:
+        if (x - pointx)**2 + (y - pointy)**2 < sense**2:
             if len(bonds) == 0 or len(bonds[-1]) == 2:
                 bonds.append([k])
             elif len(bonds[-1]) == 1:
@@ -283,7 +279,7 @@ def delete(event):
     for k in range (len(bonds)-1, -1, -1):
         if len(bonds[k]) == 2:
             dist = dist_mouse_to_line(k, points, bonds, x, y, window_settings)
-            if dist < max_dist and del_working:
+            if dist < max_dist:
                 flag = True
                 Links[bonds[k][0]][bonds[k][1]] = 0
                 Links[bonds[k][1]][bonds[k][0]] = 0
@@ -299,11 +295,32 @@ def create_point(event):
     '''
     x = scale_x_back(event.x, window_settings)
     y = scale_y_back(event.y, window_settings)
-    if add_working and event.widget == screen:
+    if event.widget == screen:
         add_point(x, y, x_size, y_size)
 
-
-
+def remove_point(event):
+    '''
+    Функция обрабатывает событие Tkinter - event и вызывает функцию из vect.py, которая удаляет мат. точку с кординатами (x, y)
+    
+    Параметры:
+        event - обрабатываемое в данный момент Tkinter событие
+    '''
+    x = event.x
+    y = event.y
+    for k in range (len(points)):
+        pointx = scale_x(points[k][0], window_settings)
+        pointy = scale_y(points[k][1], window_settings)
+        if (x - pointx)**2 + (y - pointy)**2 < sense**2 and event.widget == screen:
+            for i in range (len(bonds)-1, -1, -1):
+                if k in bonds[i]:
+                    del bonds[i]
+                elif k not in bonds[i]:
+                    if bonds[i][0] > k:
+                        bonds[i][0] -= 1
+                    if bonds[i][1] > k:
+                        bonds[i][1] -= 1
+            del_point(points[k][0], points[k][1], x_size, y_size)
+        
 root = Tk()
 
 
@@ -446,7 +463,7 @@ while True:
             create_magnet_squares(vectors, x_size, y_size, step, window_settings,
                                   screen)
 
-    create_points(mouse, con_working, points,
+    create_points(mouse, con_working, rem_working, points,
                   window_settings, screen)
     create_lines_between_points(con_working, points, bonds, x, y,
                                 window_settings, screen)
@@ -461,6 +478,8 @@ while True:
             root.bind('<Button-1>', delete)
         elif add_working:
             root.bind('<Button-1>', create_point)
+        elif rem_working:
+            root.bind('<Button-1>', remove_point)
 
     except TclError:
         break

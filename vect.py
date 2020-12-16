@@ -18,16 +18,17 @@ class Vector(list):
         __mul__ - умножения вектора на скаляр --> обозначается *
         __abs__ - взятие модуля вектора --> обозначается abs()
         __truediv__ - векторное умножение --> обозначается /
-        
+
         perp - ???
-        
+
         __floordiv__ - скалярное умножение векторов --> обозначается //
         rotated - поворачивает вектор
     '''
+
     def __init__(self, *el):
         '''
         Создание нового вектора.
-        
+
         Параметры:
             *el - набор координат
         '''
@@ -37,7 +38,7 @@ class Vector(list):
     def __add__(self, other_vector):
         '''
         Сложение векторов
-        
+
         Параметры:
             self - первое векторне слагаемое
             other_vector - второе векторное слагаемое
@@ -53,7 +54,7 @@ class Vector(list):
     def __sub__(self, other_vector):
         '''
         Вычитание векторов
-        
+
         Параметры:
             self - векторное уменьшаемое
             other_vector - векторное вычитаемое
@@ -69,7 +70,7 @@ class Vector(list):
     def __mod__(self, other_vector):
         '''
         Вычисляет длину вектора-разности self и other_vector
-        
+
         Параметры:
             self - первый вектор
             other_vector - второй вектор
@@ -85,7 +86,7 @@ class Vector(list):
     def __mul__(self, scalar):
         '''
         Умножение вектора на скаляр
-        
+
         Параметры:
             self - вектор, который нужно умножить на скаляр
             scalar - скаляр, на который нужно умножить вектор
@@ -116,12 +117,12 @@ class Vector(list):
         '''
         Задаем операцию векторного умножения x на y
         Задаётся выражением "x/y"
-        
+
         Параметры:
             self - первый вектор (только трёхмерный)
             other_vector - второй вектор (только трёхмерный)
         Возвращает:
-            Объект класса вектор, равный векторному произведению исходных векторов именно в таком порядке: 
+            Объект класса вектор, равный векторному произведению исходных векторов именно в таком порядке:
                 [self x other_vector]
         '''
 
@@ -142,18 +143,18 @@ class Vector(list):
 
         # NOTE (to @RusAv) Вообще непонятно, зачем это нужно
 
-        return (self / other) * (1 / (abs(other)*abs(self)))
+        return (self / other) * (1 / (abs(other) * abs(self)))
 
     def __floordiv__(self, other_vector):
         '''
         Скалярное проиведение векторов
         Задаётся 'x//y'
-        
+
         Параметры:
             self - первый вектор
             other_vector - второй вектор
         Возвращает:
-            float - скалярное произведение исходных векторов 
+            float - скалярное произведение исходных векторов
         '''
 
         r = 0
@@ -164,7 +165,7 @@ class Vector(list):
     def rotated(self, alpha):
         '''
         Поворот вектора на угол alpha в пл-ти Oxy
-        
+
         Параметры:
             self - поворачиваемый вектор
             alpha - угол поворота, отсчитываемый по часовой стрелке
@@ -187,14 +188,15 @@ class Point:
         accelerate - изменяет скорсть точки
         acer - изменяет ускорение точки
     '''
+
     def __init__(self, coords=Vector(), speed=Vector(), mass=0, acc=None, q=1):
         '''
         Создание точки
         Параметры:
             self - объект класса Point
-            coords - координаты точки в ПДСК. 
+            coords - координаты точки в ПДСК.
                 Рекмендуется трёхмерное пространство
-            speed - вектор скорости точки. 
+            speed - вектор скорости точки.
             mass - масса точки (по умолчанию 0)
             acc - ускорение точки
             q - заряд точки (по умолчанию 1)
@@ -208,7 +210,7 @@ class Point:
     def kinetic_en(self):
         '''
         Функция вычисляет кинетическую энергию точки
-        
+
         Параметры:
             self - сама точка
         Возвращает:
@@ -219,7 +221,7 @@ class Point:
     def move(self, dt):
         '''
         Функция изменяет координаты точки в зависимости от имеющейся скорости
-        
+
         Параметры:
             self - сама точка
             dt - дискретный шаг по времени
@@ -229,7 +231,7 @@ class Point:
     def accelerate(self, dt):
         '''
         Вычисляет скорости точки в зависимости от имеющего ускорения
-        
+
         Параметры:
             self - сама точка
             dt - дискретный шаг по времени
@@ -239,7 +241,7 @@ class Point:
     def acer(self, Force):
         '''
         Вычисляет ускорение точки в зависимости от приложенной к ней силы
-        
+
         Параметры:
             self - сама точка
             Force - равнодействующая всех сил, действующих на точку
@@ -249,8 +251,8 @@ class Point:
 
 class Body:
     '''
-    В этом классе реализована физика твёрдого тела. 
-    Объект класса распределяет взаимодействие между всеми точками, 
+    В этом классе реализована физика твёрдого тела.
+    Объект класса распределяет взаимодействие между всеми точками,
         которые ему принадлежат
     Класс не содержит атрибутов
     Методы класса:
@@ -266,8 +268,9 @@ class Body:
         acer - вычисляет ускорение ц.м. тела и угловое ускорение вращения вокруг ц.м.
         accelerate - вычисляет скорость ц.м. и угловую скорость вращения вокруг ц.м.
         move - изменяет координаты ц.м. тела
-    
+
     '''
+
     def __init__(self, dim=3):
         '''
         Создание объекта класса тело
@@ -296,7 +299,7 @@ class Body:
     def calc_center(self):
         '''
         Вычисление координат центра масс
-        
+
         Параметры:
             self - тело
         Возвращает:
@@ -312,9 +315,9 @@ class Body:
 
     def calc_i(self):
         '''
-        Вычисление момента инерции тела относительно оси, 
+        Вычисление момента инерции тела относительно оси,
         перпендикулярной пл-ти экрана и проходящей через ц.м.
-        
+
         Параметры:
             self - тело
         Возвращает:
@@ -329,11 +332,11 @@ class Body:
     def calc_F(self, Forces: list):
         '''
         Вычисляет геометрическую сумму сил, действующих на все точки данного тела
-        
+
         Параметры:
             self - тело
             Forces - массив сил
-        
+
         Возвращает:
             Vector[3] - равнодействующая сила
         '''
@@ -347,7 +350,7 @@ class Body:
         '''
         Вычисляет момент сил относительно центра масс тела.
         Возвращает скаляр, т.к. момент всегда перпендикулярен плокости Oxy при плоском движении
-        
+
         Параметры:
             self - тело
             Forces - список сил, действующих на тело
@@ -359,14 +362,14 @@ class Body:
         self.center = self.calc_center()
         for i in range(len(Forces)):
             momentum = momentum - (self.points[i].coords - self.center) / (
-            Forces[i])  # TODO: Почему стоит знак "минус"?
+                Forces[i])  # TODO: Почему стоит знак "минус"?
         return abs(momentum)
 
     def calc_params(self):
         '''
         Рассчитывает параметры тела, такие как:
         масса, энергия, момент инерции, положение центра масс, линейная скорость, угловая скорость
-        
+
         Параметры:
             self - тело
         '''
@@ -386,7 +389,7 @@ class Body:
     def delete(self, point):
         '''
         При удалении точки из тела пересчитываем параметры твердого тела
-       
+
         Параметры:
             self - тело
             point - удаляемая точка
@@ -397,7 +400,7 @@ class Body:
     def acer(self, forces):
         '''
         Выичсление углового и линейного ускорени тела исходя из действующих на него сил
-        
+
         Параметры:
             self - тело
             forces - равнодействующая всех сил
@@ -408,7 +411,7 @@ class Body:
     def accelerate(self, dt):
         '''
         Вычисление угловой и линейной скорости тела, исходя из имеющихся ускорений
-        
+
         Параметры:
             self - само тело
             dt -  дискретный шаг времени
@@ -419,7 +422,7 @@ class Body:
     def move(self, dt):
         '''
         Изменение координат центра масс тела, исходя из имеющейся линейной скорости
-        
+
         Параметры:
             self - тело
             dt - дискретный шаг времени
@@ -434,10 +437,10 @@ class Field:
         G - Гравитационная потоянная = 100
         k - Элктрическая постоянная = 10**7
         mu_0 - Магнитная постоянная = 0.6
-    
+
     Методы класса:
         __init__ - конструктор класса
-        append - добавление точки в симуляцию. 
+        append - добавление точки в симуляцию.
             Без этого, точки не создают напряженности для любого поля
         El_intensity - Вычислние напряженности электрического поля
         Gr_intensity - Вычисление напряженности гравитационного поля
@@ -445,7 +448,7 @@ class Field:
         step - Изменение параметров всех точек с учётом тел, в которых они находятся
     '''
     G = 100  # Гравитационная постоянная
-    k = 10**7  # Электрическая постоянная
+    k = 10 ** 7  # Электрическая постоянная
     mu_0 = 0.6  # Магнитная постоянная
 
     def __init__(self):
@@ -458,7 +461,7 @@ class Field:
     def append(self, point):
         '''
         Добавление материальной точки в список точек, участвующих в симуляции
-        
+
         Параметры:
             p - добавляемая точка
         '''
@@ -468,7 +471,7 @@ class Field:
         '''
         Вычисляет напряженность электрического поля в данной точке с координатами coords.
         При этом игнорируются точки из массива points
-        
+
         Параметры:
             coord - координаты места, в котором мы ищем напряженность
             points - массив игнорируемых точек
@@ -481,14 +484,14 @@ class Field:
                 if coord % point.coords < 10 ** (-9):
                     continue
                 proj = proj - (point.coords - coord) * (Field.k * point.q / ((point.coords % coord) ** 3))
-        proj[2]=0
+        proj[2] = 0
         return proj
 
     def Gr_intensity(self, vect, pointis=[]):
         '''
         Вычисляет напряженность гравиационного поля в данной точке с координатами vect.
         При этом игнорируются точки из массива points
-        
+
         Параметры:
             coord - координаты места, в котором мы ищем напряженность
             points - массив игнорируемых точек
@@ -501,14 +504,14 @@ class Field:
                 if vect % p.coords < 10 ** (-9):
                     continue
                 inten = inten - (vect - p.coords) * (Field.G * p.mass / abs(vect - p.coords) ** 3)
-        inten[2]=0
+        inten[2] = 0
         return inten
 
     def Mg_intensity(self, vect, pointis=[]):
         '''
         Вычисляет напряженность магнитного поля в данной точке с координатами vect.
         При этом игнорируются точки из массива points
-        
+
         Параметры:
             coord - координаты места, в котором мы ищем напряженность
             points - массив игнорируемых точек
@@ -528,7 +531,7 @@ class Field:
     def step(self, InBody, dt):
         '''
         Изменяет значения координат и скорости для каждой точке в теле
-        
+
         Параметры:
             InBody - ???
             dt - дискретный шаг времени
@@ -548,7 +551,7 @@ class body_field:
         '''
         Создание объекта класса body_field, который отвечает за перемещение тел в поле внешних сил.
         Подразумевается наличие единственного объекта данного класса
-        ''' 
+        '''
         self.bodies = []
 
     def append(self, body):
@@ -564,11 +567,14 @@ class body_field:
         Вызов этой функции происходит каждый раз когда меняется поле.
         '''
         l = max(in_body) + 1
-        self.bodies = [Body() for i in range(l)]
-        for i in range(len(in_body)):
-            if in_body[i] != -1: self.bodies[in_body[i]].points.append(field.points[i])
-        for body in self.bodies:
-            body.calc_params()
+        if l!=0:
+            self.bodies = [Body() for i in range(l)]
+            for i in range(len(in_body)):
+                if in_body[i] != -1: self.bodies[in_body[i]].points.append(field.points[i])
+            for body in self.bodies:
+                body.calc_params()
+        else:
+            self.bodies=[]
 
     def change_params(self, field, dt):
         '''
@@ -593,16 +599,16 @@ class body_field:
 
     def speed_points(self, dt):
         '''
-        Изменяет скорости всех точек тела согласно движению тела как целого        
+        Изменяет скорости всех точек тела согласно движению тела как целого
         '''
         for body in self.bodies:
             body.accelerate(dt)
             for p in body.points:
                 s = p.coords - body.center
                 p.speed = body.speed + \
-                          s.perp(Vector(0,0,1)) * \
-                          (body.omega * abs(s) * (1 / abs(s.perp(Vector(0,0,1)))))
-                
+                          s.perp(Vector(0, 0, 1)) * \
+                          (body.omega * abs(s) * (1 / abs(s.perp(Vector(0, 0, 1)))))
+
     def step(self, field, dt):
         '''
         Вызывают методы изменения параметров поля (его напряженности), изменения положения точек всех тел и их скоростей
@@ -612,19 +618,19 @@ class body_field:
         self.speed_points(dt)
 
 
-# TODO: Что это такое??? Всё, что не нужно, удалите, пожалуйста. Какие-то массивы. Просто страшно смотреть...   
+# TODO: Что это такое??? Всё, что не нужно, удалите, пожалуйста. Какие-то массивы. Просто страшно смотреть...
 
 n = 7
 field = Field()
-InBody = [-1, 0, 0,0,0,0,0]
+InBody = [-1, 0, 0, 0, 0, 0, 0]
 body_fi = body_field()
-Links=[ [0,0,0,1,0,0,0],
-        [0,0,0,1,0,0,0],
-        [0,0,0,0,1,1,1],
-        [1,1,0,0,0,0,0],
-        [0,0,1,0,0,0,0],
-        [0,0,1,0,0,0,1],
-        [0,0,1,0,0,1,0] ]
+Links = [[0, 0, 0, 1, 0, 0, 0],
+         [0, 0, 0, 1, 0, 0, 0],
+         [0, 0, 0, 0, 1, 1, 1],
+         [1, 1, 0, 0, 0, 0, 0],
+         [0, 0, 1, 0, 0, 0, 0],
+         [0, 0, 1, 0, 0, 0, 1],
+         [0, 0, 1, 0, 0, 1, 0]]
 stepik = 0
 dt = 0.001
 
@@ -654,7 +660,7 @@ def return_points():
     '''
     Функця возвращает набор корординат всех точек
     '''
-    point_s=[]
+    point_s = []
     for p in field.points:
         point_s.append(p.coords)
     return point_s
@@ -662,9 +668,9 @@ def return_points():
 
 def return_field(x_size, y_size, flag, STEP):
     '''
-    Функция возвращает набор: (длина вектора по х, длина вектора по у, градиент его цвета) 
+    Функция возвращает набор: (длина вектора по х, длина вектора по у, градиент его цвета)
     для всех точек плоскости с шагом в STEP.
-    При этом возращаются вектора еденичной длины, а от длины исходного вектора напряженности поля зависит градиент цвета   
+    При этом возращаются вектора еденичной длины, а от длины исходного вектора напряженности поля зависит градиент цвета
     flag = 0: возвращает электрическое поле
     flag = 1: возвращает гравитационное поле
     flag = 2: возвращает магнитное поле
@@ -673,21 +679,21 @@ def return_field(x_size, y_size, flag, STEP):
     res = []
     for x in np.arange(-x_size, x_size, STEP):
         for y in np.arange(-y_size, y_size, STEP):
-            if (flag==0) :
+            if (flag == 0):
                 vec = field.El_intensity(Vector(x, y, 0))
-            elif (flag==1):
+            elif (flag == 1):
                 vec = field.Gr_intensity(Vector(x, y, 0))
-            elif (flag==2):
+            elif (flag == 2):
                 vec = field.Mg_intensity(Vector(x, y, 0))
             grad = abs(vec)
             vec = vec * (STEP * (1 / abs(vec)))
-            res.append(([x - vec[0]/2, x + vec[0]/2], [y - vec[1]/2, y + vec[1]/2], grad))
+            res.append(([x - vec[0] / 2, x + vec[0] / 2], [y - vec[1] / 2, y + vec[1] / 2], grad))
     return res
 
 
 def return_bodies():
     '''
-    Возращает набор множеств точек всех тел, 
+    Возращает набор множеств точек всех тел,
     т.е. список списков, где каждый вложенный список - точки данного тела
     '''
     bodie = []
@@ -704,14 +710,14 @@ def Grand_field(x_size, y_size, flag, paused, dt):
     3) STEP - шаг, по которому было рассчитано Field
     4) bodie - набор всех тел, где каждое тело - набор точек, из которых оно состоит
     '''
-    global  body_fi
+    global body_fi
     STEP = 40
     Field = []
     if paused:
-        for i in range (3):
+        for i in range(3):
             Field.append(return_field(x_size, y_size, i, STEP))
     else:
-        #шаг поля
+        # шаг поля
         for i in range(9):
             field.step(InBody, dt)  # NOTE: Что это такое? Почему 9 раз нужно это сделать?
             body_fi.step(field, dt)
@@ -737,11 +743,11 @@ def Re_calc_Links():
     InBody = [-2 for i in range(len(InBody))]
     for i in range(len(InBody)):
         if InBody[i] == -2:
-                c = DFS(i, marker)
-                if c == 1:
-                    InBody[i] = -1
-                else: 
-                    marker += 1
+            c = DFS(i, marker)
+            if c == 1:
+                InBody[i] = -1
+            else:
+                marker += 1
 
 
 def Re_calc_all():
@@ -749,8 +755,8 @@ def Re_calc_all():
     body_fi.initial(InBody, field)
 
 
-def add_point(x,y,x_size,y_size):
-    global n,Links,InBody,field
+def add_point(x, y, x_size, y_size):
+    global n, Links, InBody, field
     InBody.append(-1)
     field.append(
         Point(Vector(x, y, 0), Vector(0, 0, 0), 10,
@@ -764,8 +770,8 @@ def add_point(x,y,x_size,y_size):
 def del_point(x, y, x_size, y_size):
     global n, Links, InBody, field
     for i in range(len(field.points)):
-        p=field.points[i]
-        if abs(p.coords-Vector(x,y,0))<0.01:
+        p = field.points[i]
+        if abs(p.coords - Vector(x, y, 0)) < 0.01:
             InBody.pop(i)
             for j in range(n):
                 Links[j].pop(i)

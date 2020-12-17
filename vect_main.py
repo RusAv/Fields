@@ -44,8 +44,8 @@ dt = 0.001
 x_size = 300
 y_size = 300
 paused = False
-window_width = 610
-window_height = 610
+window_width = 400
+window_height = 400
 max_points = 10
 flag = False
 mode = 0  # Отвечает за тип отображаемого поля: 0 - электр., 1 - гравитационное, 2 - магнитное
@@ -329,11 +329,14 @@ def remove_point(event):
                         bonds[i][1] -= 1
             del_point(points[k][0], points[k][1])
 
+
 def show_rules():
     '''
     Функция выводит правила пользования. 
     '''
     messagebox.showinfo("Правила", rules)
+
+
 def on_closing():
     '''
     Функция просто выводит на экран предупреждающее о попытке выхода окно. 
@@ -428,11 +431,14 @@ pause_button = Button(button_frame, width = 20, text="Пауза",
                         command = paused_check)
 pause_button.pack(side=LEFT)
 
+# Создание ползунка, изменяющего массу создаваемых точек
 mass_label = Label(point_features, text="Масса")
 mass_scale = Scale(point_features, from_=1,
                   to=500, orient=HORIZONTAL)
 mass_label.pack(side=LEFT)
 mass_scale.pack(side=LEFT)
+
+# Создание ползунка, изменяющего заряд создаваемых точек
 charge_label = Label(point_features, text="Заряд")
 charge_scale = Scale(point_features, from_=-50,
                   to=50, orient=HORIZONTAL)

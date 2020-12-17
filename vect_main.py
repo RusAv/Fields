@@ -44,8 +44,12 @@ dt = 0.001
 x_size = 300
 y_size = 300
 paused = False
-window_width = 400
-window_height = 400
+window_width = 610
+window_height = 610
+max_points = 10
+flag = False
+mode = 0  # Отвечает за тип отображаемого поля: 0 - электр., 1 - гравитационное, 2 - магнитное
+bonds = []
 
 ending_message = "Вы покидаете виртуальный мир и возвращаетесь в реальный." + '\n' + \
                  "Не забудьте, что НАСТОЯЩИЕ гравитационные и электромагнитные поля могут Вас убить!" + '\n' + '\n' +\
@@ -58,6 +62,8 @@ starting_message = 'Данный продукт является результ�
                 исходных материалов в любых целях.' + '\n' + '\n' +\
                 'Документация к использованию изложена в файлах "README.md" и "documentaion.pdf".' + '\n' + '\n' +\
                 'Благодарим за то, что выбрали нас!'
+
+rules = 'Правила.'
 
 def electro():
     '''
@@ -295,8 +301,10 @@ def create_point(event):
     '''
     x = scale_x_back(event.x, window_settings)
     y = scale_y_back(event.y, window_settings)
+    mass = mass_scale.get()
+    charge = charge_scale.get()
     if event.widget == screen:
-        add_point(x, y, x_size, y_size)
+        add_point(x, y, mass, charge)
 
 def remove_point(event):
     '''
@@ -319,11 +327,13 @@ def remove_point(event):
                         bonds[i][0] -= 1
                     if bonds[i][1] > k:
                         bonds[i][1] -= 1
-            del_point(points[k][0], points[k][1], x_size, y_size)
-        
-root = Tk()
+            del_point(points[k][0], points[k][1])
 
-
+def show_rules():
+    '''
+    Функция выводит правила пользования. 
+    '''
+    messagebox.showinfo("Правила", rules)
 def on_closing():
     '''
     Функция просто выводит на экран предупреждающее о попытке выхода окно. 
@@ -331,8 +341,7 @@ def on_closing():
     if messagebox.askyesno("Внимание!", ending_message):
         root.destroy()
 
-
-flag = False
+root = Tk()
 
 # При открытии приложения показывается "Дисклеймер"
 messagebox.showinfo('Добро пожаловать!', starting_message)
@@ -349,7 +358,10 @@ root.title("Vecield")
 
 mode_frame = Frame(root)
 mode_frame.pack(side=TOP)
-
+# Создание кнопки переключения на правила пользования
+rules_button = Button(mode_frame, width = 25, text="Правила",
+                        command = show_rules)
+rules_button.pack(side=TOP)
 # Создание кнопки переключения на элекрическое поле
 electro_button = Button(mode_frame, width = 25, text="Электрическое поле",
                         command = electro, bg = 'cyan')
@@ -380,6 +392,9 @@ button_frame.pack(side=TOP)
 
 button2_frame = Frame(root)
 button2_frame.pack(side=TOP)
+
+point_features = Frame(root)
+point_features.pack(side=TOP)
 
 # Создание кнопки создания точек
 # width - её ширина
@@ -413,21 +428,25 @@ pause_button = Button(button_frame, width = 20, text="Пауза",
                         command = paused_check)
 pause_button.pack(side=LEFT)
 
+mass_label = Label(point_features, text="Масса")
+mass_scale = Scale(point_features, from_=1,
+                  to=500, orient=HORIZONTAL)
+mass_label.pack(side=LEFT)
+mass_scale.pack(side=LEFT)
+charge_label = Label(point_features, text="Заряд")
+charge_scale = Scale(point_features, from_=-50,
+                  to=50, orient=HORIZONTAL)
+charge_label.pack(side=LEFT)
+charge_scale.pack(side=LEFT)
+
 # Создание ползунка, изменяющего масштаб поля
-scale = Scale(button2_frame, variable=x_size, from_=300,
+scale_label = Label(point_features, text="Масштаб")
+scale = Scale(point_features, from_=300,
                   to=1200, orient=HORIZONTAL)
+scale_label.pack(side=LEFT)
 scale.pack(side=LEFT)
 
-
-mouse = Mouse()  # Первоначальная инициализация точек
-
-# TODO: убрать первоначальное создание точек, т.к. мы можем их сами создавать теперь
-# TODO: Проблема в том, что сейчас он ругатся на пустой список точек
-# TODO: Не знаю, как это легко решить. Но можно хотя бы сократить кол-во создаваемых точек до одной и ставить её в центре
-# TODO: Но что делать, если пользователь удалит все точки. Опять возникнет ошибка
-# TODO: Так что проблема требует к себе пристального внимания
-mode = 0  # Отвечает за тип отображаемого поля: 0 - электр., 1 - гравитационное, 2 - магнитное
-bonds = []
+mouse = Mouse()
 
 while True:
     y_size = x_size = scale.get()
@@ -445,6 +464,7 @@ while True:
     except ZeroDivisionError:
         Field = [[]]
         points = []
+        step = 0
     if paused:  # Прорисовка векторов всех полей в режиме паузы
         if mode == 0:
             vectors = Field[0]
@@ -480,12 +500,21 @@ while True:
         elif del_working:
             root.bind('<Button-1>', delete)
         elif add_working:
-            root.bind('<Button-1>', create_point)
+            if len(points) <= max_points - 1:
+                root.bind('<Button-1>', create_point)
+            else:
+                root.unbind('<Button-1>')
+                add_working = False
+                add_clicks = 0
+                add_button.config(text = 'Режим добавления точек: недоступен',
+                                  bg = 'gray')
         elif rem_working:
             root.bind('<Button-1>', remove_point)
-
     except TclError:
         break
+    if len(points) <= max_points - 1 and not add_working:
+        add_button.config(text = 'Режим добавления точек: включить',
+                                  bg = 'gray94')
     root.update()
     try:
         screen.delete('all')

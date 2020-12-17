@@ -649,7 +649,8 @@ def return_field(x_size, y_size, flag, STEP):
             elif (flag == 2):
                 vec = field.Mg_intensity(Vector(x, y, 0))
             grad = abs(vec)
-            vec = vec * (STEP * (1 / abs(vec)))
+            if abs(vec)!=0:
+                vec = vec * (STEP * (1 / abs(vec)))
             res.append(([x - vec[0] / 2, x + vec[0] / 2], [y - vec[1] / 2, y + vec[1] / 2], grad))
     return res
 

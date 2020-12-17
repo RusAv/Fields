@@ -105,30 +105,6 @@ def create_points(mouse, con_working, rem_working, points, window_settings,
         if (x - pointx)**2 + (y - pointy)**2 < sense**2 and (con_working or rem_working):
             screen.create_oval(pointx - sense, pointy - sense, pointx + sense,
                                 pointy + sense, fill="yellow")
-
-'''def create_first_bonds(points, bodies):
-    bonds = []
-    for i in range (len(bodies)):
-        for j in range (len(bodies[i].points)-1):
-            ind1 = ind2 = -1
-            for k in range (len(points)):
-                if points[k] == bodies[i].points[j].coords:
-                    ind1 = k
-                elif points[k] == bodies[i].points[j+1].coords:
-                    ind2 = k
-            if ind1 != -1 and ind2 != -1:
-                bonds.append([ind1, ind2])
-    return bonds'''
-
-def create_first_bonds(points, Links):
-    '''здесь создаются первые связи (ребра), которые изначально
-       прописаны в матрице смежности Links'''
-    bonds = []
-    for i in range (len(Links)):
-        for j in range (len(Links[i])):
-            if Links[i][j] == 1:
-                bonds.append([i, j])
-    return bonds
             
 def create_lines_between_points(con_working, points, bonds, x, y,
                                 window_settings, screen):

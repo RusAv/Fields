@@ -44,9 +44,15 @@ dt = 0.001
 x_size = 300
 y_size = 300
 paused = False
-window_width = 400
-window_height = 400
+window_width = 610
+window_height = 610
 max_points = 10
+min_scale = 300
+max_scale = 1200
+min_mass = 1
+max_mass = 500
+min_charge = -50
+max_charge = 50
 flag = False
 mode = 0  # Отвечает за тип отображаемого поля: 0 - электр., 1 - гравитационное, 2 - магнитное
 bonds = []
@@ -428,21 +434,21 @@ pause_button = Button(button_frame, width = 20, text="Пауза",
                         command = paused_check)
 pause_button.pack(side=LEFT)
 
-mass_label = Label(point_features, text="Масса")
-mass_scale = Scale(point_features, from_=1,
-                  to=500, orient=HORIZONTAL)
+mass_label = Label(point_features, text="Масса, кг")
+mass_scale = Scale(point_features, from_=min_mass,
+                  to=max_mass, orient=HORIZONTAL)
 mass_label.pack(side=LEFT)
 mass_scale.pack(side=LEFT)
-charge_label = Label(point_features, text="Заряд")
-charge_scale = Scale(point_features, from_=-50,
-                  to=50, orient=HORIZONTAL)
+charge_label = Label(point_features, text="Заряд, Кл")
+charge_scale = Scale(point_features, from_=min_charge,
+                  to=max_charge, orient=HORIZONTAL)
 charge_label.pack(side=LEFT)
 charge_scale.pack(side=LEFT)
 
 # Создание ползунка, изменяющего масштаб поля
 scale_label = Label(point_features, text="Масштаб")
-scale = Scale(point_features, from_=300,
-                  to=1200, orient=HORIZONTAL)
+scale = Scale(point_features, from_=min_scale,
+                  to=max_scale, orient=HORIZONTAL)
 scale_label.pack(side=LEFT)
 scale.pack(side=LEFT)
 
@@ -477,7 +483,7 @@ while True:
             create_gravit_vectors(vectors, window_settings, screen)
         else:
             vectors = Field[2]
-            create_magnet_squares(vectors, step, window_settings,
+            create_magnet_squares(vectors, x_size, y_size, step, window_settings,
                                   screen)
     else:  # Прорисовка только активного поля в работющем режиме
         vectors = Field[0]
@@ -486,7 +492,7 @@ while True:
         elif mode == 1:
             create_gravit_vectors(vectors, window_settings, screen)
         else:
-            create_magnet_squares(vectors, step, window_settings,
+            create_magnet_squares(vectors, x_size, y_size, step, window_settings,
                                   screen)
 
     create_points(mouse, con_working, rem_working, points,

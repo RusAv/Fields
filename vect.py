@@ -620,17 +620,11 @@ class body_field:
 
 # TODO: Что это такое??? Всё, что не нужно, удалите, пожалуйста. Какие-то массивы. Просто страшно смотреть...
 
-n = 7
+n = 0
 field = Field()
-InBody = [-1, 0, 0, 0, 0, 0, 0]
+InBody = []
 body_fi = body_field()
-Links = [[0, 0, 0, 1, 0, 0, 0],
-         [0, 0, 0, 1, 0, 0, 0],
-         [0, 0, 0, 0, 1, 1, 1],
-         [1, 1, 0, 0, 0, 0, 0],
-         [0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 1, 0, 0, 0, 1],
-         [0, 0, 1, 0, 0, 1, 0]]
+Links = [[]]
 stepik = 0
 dt = 0.001
 
@@ -764,7 +758,9 @@ def add_point(x, y, x_size, y_size):
     n += 1
     for i in range(len(Links)):
         Links[i].append(0)
-    Links.append([0 for i in range(len(Links) + 1)])
+    if n>1: Links.append([0 for i in range(n)])
+    #print(InBody)
+    #print(Links)
 
 
 def del_point(x, y, x_size, y_size):

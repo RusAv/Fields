@@ -301,8 +301,10 @@ def create_point(event):
     '''
     x = scale_x_back(event.x, window_settings)
     y = scale_y_back(event.y, window_settings)
+    mass = mass_scale.get()
+    charge = charge_scale.get()
     if event.widget == screen:
-        add_point(x, y, x_size, y_size)
+        add_point(x, y, mass, charge)
 
 def remove_point(event):
     '''
@@ -325,7 +327,7 @@ def remove_point(event):
                         bonds[i][0] -= 1
                     if bonds[i][1] > k:
                         bonds[i][1] -= 1
-            del_point(points[k][0], points[k][1], x_size, y_size)
+            del_point(points[k][0], points[k][1])
 
 def show_rules():
     '''
@@ -391,6 +393,9 @@ button_frame.pack(side=TOP)
 button2_frame = Frame(root)
 button2_frame.pack(side=TOP)
 
+point_features = Frame(root)
+point_features.pack(side=TOP)
+
 # Создание кнопки создания точек
 # width - её ширина
 add_button = Button(button2_frame, width = 37,
@@ -423,9 +428,22 @@ pause_button = Button(button_frame, width = 20, text="Пауза",
                         command = paused_check)
 pause_button.pack(side=LEFT)
 
+mass_label = Label(point_features, text="Масса")
+mass_scale = Scale(point_features, from_=1,
+                  to=500, orient=HORIZONTAL)
+mass_label.pack(side=LEFT)
+mass_scale.pack(side=LEFT)
+charge_label = Label(point_features, text="Заряд")
+charge_scale = Scale(point_features, from_=-50,
+                  to=50, orient=HORIZONTAL)
+charge_label.pack(side=LEFT)
+charge_scale.pack(side=LEFT)
+
 # Создание ползунка, изменяющего масштаб поля
-scale = Scale(button2_frame, variable=x_size, from_=300,
+scale_label = Label(point_features, text="Масштаб")
+scale = Scale(point_features, from_=300,
                   to=1200, orient=HORIZONTAL)
+scale_label.pack(side=LEFT)
 scale.pack(side=LEFT)
 
 mouse = Mouse()

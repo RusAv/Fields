@@ -46,6 +46,7 @@ y_size = 300
 paused = False
 window_width = 610
 window_height = 610
+max_points = 10
 
 ending_message = "Вы покидаете виртуальный мир и возвращаетесь в реальный." + '\n' + \
                  "Не забудьте, что НАСТОЯЩИЕ гравитационные и электромагнитные поля могут Вас убить!" + '\n' + '\n' +\
@@ -445,6 +446,7 @@ while True:
     except ZeroDivisionError:
         Field = [[]]
         points = []
+        step = 0
     if paused:  # Прорисовка векторов всех полей в режиме паузы
         if mode == 0:
             vectors = Field[0]
@@ -480,12 +482,21 @@ while True:
         elif del_working:
             root.bind('<Button-1>', delete)
         elif add_working:
-            root.bind('<Button-1>', create_point)
+            if len(points) <= max_points - 1:
+                root.bind('<Button-1>', create_point)
+            else:
+                root.unbind('<Button-1>')
+                add_working = False
+                add_clicks = 0
+                add_button.config(text = 'Режим добавления точек: недоступен',
+                                  bg = 'gray')
         elif rem_working:
             root.bind('<Button-1>', remove_point)
-
     except TclError:
         break
+    if len(points) <= max_points - 1 and not add_working:
+        add_button.config(text = 'Режим добавления точек: включить',
+                                  bg = 'gray94')
     root.update()
     try:
         screen.delete('all')

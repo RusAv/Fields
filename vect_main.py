@@ -44,8 +44,8 @@ dt = 0.001
 x_size = 300
 y_size = 300
 paused = False
-window_width = 610
-window_height = 610
+window_width = 400
+window_height = 400
 max_points = 10
 flag = False
 mode = 0  # Отвечает за тип отображаемого поля: 0 - электр., 1 - гравитационное, 2 - магнитное
@@ -477,7 +477,7 @@ while True:
             create_gravit_vectors(vectors, window_settings, screen)
         else:
             vectors = Field[2]
-            create_magnet_squares(vectors, x_size, y_size, step, window_settings,
+            create_magnet_squares(vectors, step, window_settings,
                                   screen)
     else:  # Прорисовка только активного поля в работющем режиме
         vectors = Field[0]
@@ -486,7 +486,7 @@ while True:
         elif mode == 1:
             create_gravit_vectors(vectors, window_settings, screen)
         else:
-            create_magnet_squares(vectors, x_size, y_size, step, window_settings,
+            create_magnet_squares(vectors, step, window_settings,
                                   screen)
 
     create_points(mouse, con_working, rem_working, points,

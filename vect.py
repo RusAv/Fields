@@ -1,10 +1,33 @@
+'''
+Данный класс отвечает за атематическое вычисление и моделирование процесса.
+
+В нём содердатся классы:
+    Vector
+    Point
+    Body
+    Field    
+    body_field
+
+А также функции:
+    make_points - создаёт начальное распределние точек
+                    (не используется, но удалять не стали)
+    return_points - Возвращает массив точек для отображения
+    return_field - Возвращает массив с напряженностью полей для отображения
+    return_bodies - Возращает набор множеств точек всех тел
+    Grand_fiels - Возвращает множество значений. Подробнее см. описание функции
+    DFS - Алгоритм обхода графа в глубину
+    Re_calc_Links - Пересчитывает все связи между точками
+    Re_calc_all - Вызывает функции, необходимые для перерасчёта связей
+    add_point - добаляет новую точку
+    del_point - удаляет точку
+'''
+
+
 import matplotlib.pyplot as plt
 from random import *
 import numpy as np
 from matplotlib.animation import *
 
-
-# TODO: Сделать нормальную размерность у всех векторов. Так оно, конечно, тоже работает, но лучше бы реализовать как-то иначе.
 
 class Vector(list):
     '''
@@ -18,7 +41,7 @@ class Vector(list):
         __mul__ - умножения вектора на скаляр --> обозначается *
         __abs__ - взятие модуля вектора --> обозначается abs()
         __truediv__ - векторное умножение --> обозначается /
-        perp - ???
+        perp - стрит перпендикулярные единичный вектор 
         __floordiv__ - скалярное умножение векторов --> обозначается //
         rotated - поворачивает вектор
     '''
@@ -130,10 +153,15 @@ class Vector(list):
 
     def perp(self, other):
         '''
-        ???
-        '''
+        Строит единичный вектор, перпендикулярный двум данным
+        
+        Параметры:
+            self - первый вектор
+            other - второй вектор
 
-        # NOTE (to @RusAv) Вообще непонятно, зачем это нужно
+        Возвращает:
+            Vector[3] 
+        '''
 
         return (self / other) * (1 / (abs(other) * abs(self)))
 
@@ -342,7 +370,7 @@ class Body:
         self.center = self.calc_center()
         for i in range(len(Forces)):
             momentum = momentum - (self.points[i].coords - self.center) / (
-                Forces[i])  # TODO: Почему стоит знак "минус"?
+                Forces[i])
         return abs(momentum)
 
     def calc_params(self):
@@ -504,7 +532,7 @@ class Field:
         Параметры:
             InBody - ???
             dt - дискретный шаг времени
-        '''  # TODO: узнать, что такое InBody
+        '''
         for i in range(len(self.points)):
             p = self.points[i]
             if InBody[i] == -1:
@@ -516,6 +544,19 @@ class Field:
 
 
 class body_field:
+    '''
+    Данный класс отввеавет за передачу взаимодействия от полей к телам и их точкам, в частности
+    
+    Методы:
+        __init__ - конструктор объекта класса 
+        append - добавление тела в симуляцию
+        initial - создание поля
+        change_params - вычисляет воздействие полей на тела
+        move_points - изменяет положение точек согласно их объединению в тела
+        speed_points - изменят скорости точек согласно их объединению в тела
+        step - шаг вычислений
+    '''
+    
     def __init__(self):
         '''
         Создание объекта класса body_field, который отвечает за перемещение тел в поле внешних сил.
@@ -526,6 +567,9 @@ class body_field:
     def append(self, body):
         '''
         Добавление тела в список всех существующих тел
+        
+        Параметры:
+            body - тело, которое вы хотите добавить в симуляцию
         '''
         self.bodies.append(body)
 
@@ -534,6 +578,12 @@ class body_field:
         Тут происходит создание поля по массиву в котором каждой точке сопоставлен номер тела, в котором она состоит.
         Также вычисляютсю параметры такого тела.
         Вызов этой функции происходит каждый раз когда меняется поле.
+        
+        Параметры:
+            in_body - специальнй массив, 
+                в котором каждой точке сопоставлен номер тела, в котором она состоит, 
+                либо -1, если она не находиться ни в одном из тел
+            field - объект класса Field, созданный для данной симуляции
         '''
         l = max(in_body) + 1
         if l!=0:
@@ -548,6 +598,11 @@ class body_field:
     def change_params(self, field, dt):
         '''
         Вычисляет, какие силы действуют на каждое тело посредством суммирования сил, действиующих на каждую точку тела
+        И вычисляет ускорения
+
+        Параметры:
+            field - объект класса Field, созданный для данной симуляции
+            dt - дискретный шаг по времени
         '''
         for body in self.bodies:
             forces = [field.El_intensity(body.points[i].coords, body.points) * body.points[i].q +
@@ -559,6 +614,9 @@ class body_field:
     def move_points(self, dt):
         '''
         Изменяет положение всех точек в теле согласно движению тела как целого
+        
+        Параметры:
+            dt - дискретный шаг времени
         '''
         for body in self.bodies:
             for p in body.points:
@@ -569,6 +627,9 @@ class body_field:
     def speed_points(self, dt):
         '''
         Изменяет скорости всех точек тела согласно движению тела как целого
+        
+        Параметры:
+            dt - дискретный шаг времени
         '''
         for body in self.bodies:
             body.accelerate(dt)
@@ -581,13 +642,15 @@ class body_field:
     def step(self, field, dt):
         '''
         Вызывают методы изменения параметров поля (его напряженности), изменения положения точек всех тел и их скоростей
+        
+        Параметры:
+            field - объект класса Field, созданный для данной симуляции
+            dt - дискретный шаг времени
         '''
         self.change_params(field, dt)
         self.move_points(dt)
         self.speed_points(dt)
 
-
-# TODO: Что это такое??? Всё, что не нужно, удалите, пожалуйста. Какие-то массивы. Просто страшно смотреть...
 
 n = 0
 field = Field()
@@ -601,6 +664,9 @@ dt = 0.001
 def make_points(x_size, y_size):
     '''
     Случайным образом создаёт точки в окне. Вызывается при первоначальном открытии окна.
+    
+    Параметры:
+        x_size, y_size - размеры окна
     '''
     global body_fi
     for i in range(0, n):
@@ -633,10 +699,16 @@ def return_field(x_size, y_size, flag, STEP):
     '''
     Функция возвращает набор: (длина вектора по х, длина вектора по у, градиент его цвета)
     для всех точек плоскости с шагом в STEP.
+
     При этом возращаются вектора еденичной длины, а от длины исходного вектора напряженности поля зависит градиент цвета
     flag = 0: возвращает электрическое поле
     flag = 1: возвращает гравитационное поле
     flag = 2: возвращает магнитное поле
+    
+    Параметры: 
+        x_size, y_size - размеры окна
+        flag - исано выше
+        STEP - дискретный шаг в пространстве по любому из направлений 
     '''
 
     res = []
@@ -673,6 +745,12 @@ def Grand_field(x_size, y_size, flag, paused, dt):
     2) points - набор координат всех точек
     3) STEP - шаг, по которому было рассчитано Field
     4) bodie - набор всех тел, где каждое тело - набор точек, из которых оно состоит
+    
+    Параметры:
+        x_size, y_size - размеры окна
+        flag - см. описание функции return_field модуля vect.py
+        paused - Bool переменная, True - если игра поставлена на паузу, False - иначе.
+        dt - дискретный шаг по времени
     '''
     global body_fi
     STEP = 40
@@ -683,7 +761,7 @@ def Grand_field(x_size, y_size, flag, paused, dt):
     else:
         # шаг поля
         for i in range(9):
-            field.step(InBody, dt)  # NOTE: Что это такое? Почему 9 раз нужно это сделать?
+            field.step(InBody, dt) 
             body_fi.step(field, dt)
         Field.append(return_field(x_size, y_size, flag, STEP))
     points = return_points()
@@ -692,6 +770,14 @@ def Grand_field(x_size, y_size, flag, paused, dt):
 
 
 def DFS(vertice, it):
+    '''
+    Стандартный алгоритм обхода графа в глубину. Это необходимо для определения,
+        развалилось ли тело на компоненты связности после удаления точки.
+    
+    Параметы:
+        vertice - вершина, прохоимая алгоритмом на данном шаге
+        it - номер обходимого тела
+    '''
     count = 0
     InBody[vertice] = it
     for i in range(len(Links[vertice])):
@@ -702,6 +788,11 @@ def DFS(vertice, it):
 
 
 def Re_calc_Links():
+    '''
+    Функция пересчитывает все связи, если вдруг тело развалилось на компоненты связности
+        после удаления какой-либо вершины
+    Изменяет глобальный массив InBody
+    '''
     global Links, InBody, body_fi
     marker = 0
     InBody = [-2 for i in range(len(InBody))]
@@ -715,11 +806,23 @@ def Re_calc_Links():
 
 
 def Re_calc_all():
+    '''
+    Вызывает функции, которые небходимы для окончательного перерасчёта всех связей
+        после удаления точки из тела
+    '''
     Re_calc_Links()
     body_fi.initial(InBody, field)
 
 
 def add_point(x, y, mass, charge):
+    '''
+    Добавляет новую точку
+
+    Параметры:
+        x, y - координаты данной точки
+        mass - её масса
+        charge - заряд
+    '''
     global n, Links, InBody, field
     InBody.append(-1)
     point = Point(Vector(x, y, 0), Vector(0, 0, 0), 10,
@@ -731,11 +834,15 @@ def add_point(x, y, mass, charge):
     for i in range(len(Links)):
         Links[i].append(0)
     if n>1: Links.append([0 for i in range(n)])
-    #print(InBody)
-    #print(Links)
 
 
 def del_point(x, y):
+    '''
+    Удаляет точку по известным координатам
+
+    Параметры:
+        x, y - координаты точки
+    '''
     global n, Links, InBody, field
     for i in range(len(field.points)):
         p = field.points[i]

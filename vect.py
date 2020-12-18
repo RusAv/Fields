@@ -155,7 +155,6 @@ class Vector(list):
     def perp(self, other):
         '''
         Строит единичный вектор, перпендикулярный двум данным
-
         Параметры:
             self - первый вектор
             other - второй вектор
@@ -547,7 +546,6 @@ class Field:
 class body_field:
     '''
     Данный класс отввеавет за передачу взаимодействия от полей к телам и их точкам, в частности
-
     Методы:
         __init__ - конструктор объекта класса
         append - добавление тела в симуляцию
@@ -568,7 +566,6 @@ class body_field:
     def append(self, body):
         '''
         Добавление тела в список всех существующих тел
-
         Параметры:
             body - тело, которое вы хотите добавить в симуляцию
         '''
@@ -579,7 +576,6 @@ class body_field:
         Тут происходит создание поля по массиву в котором каждой точке сопоставлен номер тела, в котором она состоит.
         Также вычисляютсю параметры такого тела.
         Вызов этой функции происходит каждый раз когда меняется поле.
-
         Параметры:
             in_body - специальнй массив,
                 в котором каждой точке сопоставлен номер тела, в котором она состоит,
@@ -614,7 +610,6 @@ class body_field:
     def move_points(self, dt):
         '''
         Изменяет положение всех точек в теле согласно движению тела как целого
-
         Параметры:
             dt - дискретный шаг времени
         '''
@@ -638,7 +633,6 @@ class body_field:
     def step(self, field, dt):
         '''
         Вызывают методы изменения параметров поля (его напряженности), изменения положения точек всех тел и их скоростей
-
         Параметры:
             field - объект класса Field, созданный для данной симуляции
             dt - дискретный шаг времени
@@ -652,7 +646,6 @@ n = 0
 field = Field()
 InBody = []
 body_fi = body_field()
-Links = [[]]
 stepik = 0
 dt = 0.001
 
@@ -660,7 +653,6 @@ dt = 0.001
 def make_points(x_size, y_size):
     '''
     Случайным образом создаёт точки в окне. Вызывается при первоначальном открытии окна.
-
     Параметры:
         x_size, y_size - размеры окна
     '''
@@ -676,7 +668,6 @@ def sigm(x):
     '''
     Отвечает за градиент поля
     Высчитывает значение градиента по напряженности x: float
-
     Возвращает:
         float: подробнее см. documentation.pdf
     '''
@@ -701,7 +692,6 @@ def return_field(x_size, y_size, flag, STEP):
     flag = 0: возвращает электрическое поле
     flag = 1: возвращает гравитационное поле
     flag = 2: возвращает магнитное поле
-
     Параметры:
         x_size, y_size - размеры окна
         flag - исано выше
@@ -742,7 +732,6 @@ def Grand_field(x_size, y_size, flag, paused, dt):
     2) points - набор координат всех точек
     3) STEP - шаг, по которому было рассчитано Field
     4) bodie - набор всех тел, где каждое тело - набор точек, из которых оно состоит
-
     Параметры:
         x_size, y_size - размеры окна
         flag - см. описание функции return_field модуля vect.py
@@ -766,11 +755,10 @@ def Grand_field(x_size, y_size, flag, paused, dt):
     return Field, points, STEP, bodie
 
 
-def DFS(vertice, it):
+def DFS(vertice, it, Links):
     '''
     Стандартный алгоритм обхода графа в глубину. Это необходимо для определения,
         развалилось ли тело на компоненты связности после удаления точки.
-
     Параметы:
         vertice - вершина, прохоимая алгоритмом на данном шаге
         it - номер обходимого тела
@@ -779,39 +767,39 @@ def DFS(vertice, it):
     InBody[vertice] = it
     for i in range(len(Links[vertice])):
         if i != vertice and Links[i][vertice] == 1 and InBody[i] == -2:
-            count += DFS(i, it)
+            count += DFS(i, it, Links)
     count += 1
     return count
 
 
-def Re_calc_Links():
+def Re_calc_Links(Links):
     '''
     Функция пересчитывает все связи, если вдруг тело развалилось на компоненты связности
         после удаления какой-либо вершины
     Изменяет глобальный массив InBody
     '''
-    global Links, InBody, body_fi
+    global InBody, body_fi
     marker = 0
     InBody = [-2 for i in range(len(InBody))]
     for i in range(len(InBody)):
         if InBody[i] == -2:
-            c = DFS(i, marker)
+            c = DFS(i, marker, Links)
             if c == 1:
                 InBody[i] = -1
             else:
                 marker += 1
 
 
-def Re_calc_all():
+def Re_calc_all(Links):
     '''
     Вызывает функции, которые небходимы для окончательного перерасчёта всех связей
         после удаления точки из тела
     '''
-    Re_calc_Links()
+    Re_calc_Links(Links)
     body_fi.initial(InBody, field)
 
 
-def add_point(x, y, mass, charge):
+def add_point(x, y, mass, charge, Links):
     '''
     Добавляет новую точку
     Параметры:
@@ -819,7 +807,7 @@ def add_point(x, y, mass, charge):
         mass - её масса
         charge - заряд
     '''
-    global n, Links, InBody, field
+    global n, InBody, field
     InBody.append(-1)
     point = Point(Vector(x, y, 0), Vector(0, 0, 0), 10,
                   Vector(0, 0, 0), 1)
@@ -832,18 +820,18 @@ def add_point(x, y, mass, charge):
     if n > 1: Links.append([0 for i in range(n)])
 
 
-def del_point(x, y):
+def del_point(x, y, Links):
     '''
     Удаляет точку по известным координатам
     Параметры:
         x, y - координаты точки
     '''
-    global n, Links, InBody, field
-    for i in range(len(field.points)):
+    global n, InBody, field
+    for i in range(len(field.points)-1, -1, -1):
         p = field.points[i]
         if abs(p.coords - Vector(x, y, 0)) < 0.01:
             InBody.pop(i)
-            for j in range(n):
+            for j in range(n-1, -1, -1):
                 Links[j].pop(i)
             Links.pop(i)
             field.points.pop(i)
@@ -851,7 +839,7 @@ def del_point(x, y):
             if Links==[]:
                 Links=[[]]
             try:
-                Re_calc_all()
+                Re_calc_all(Links)
             except ValueError:
                 pass
             break

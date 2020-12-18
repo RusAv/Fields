@@ -56,6 +56,7 @@ max_charge = 50
 flag = False
 mode = 0  # Отвечает за тип отображаемого поля: 0 - электр., 1 - гравитационное, 2 - магнитное
 bonds = []
+Links = [[]]
 
 ending_message = "Вы покидаете виртуальный мир и возвращаетесь в реальный." + '\n' + \
                  "Не забудьте, что НАСТОЯЩИЕ гравитационные и электромагнитные поля могут Вас убить!" + '\n' + '\n' +\
@@ -270,8 +271,10 @@ def connect(event):
                 if bonds[-1][0] != k:
                     flag = True
                     bonds[-1].append(k)
-                    Links[bonds[-1][0]][bonds[-1][1]] = 1
-                    Links[bonds[-1][1]][bonds[-1][0]] = 1
+                    ind1 = bonds[-1][0]
+                    ind2 = bonds[-1][1]
+                    Links[ind1][ind2] = 1
+                    Links[ind2][ind1] = 1
                 else:
                     del bonds[-1]
 
@@ -310,7 +313,7 @@ def create_point(event):
     mass = mass_scale.get()
     charge = charge_scale.get()
     if event.widget == screen:
-        add_point(x, y, mass, charge)
+        add_point(x, y, mass, charge, Links)
 
 def remove_point(event):
     '''
@@ -333,7 +336,7 @@ def remove_point(event):
                         bonds[i][0] -= 1
                     if bonds[i][1] > k:
                         bonds[i][1] -= 1
-            del_point(points[k][0], points[k][1])
+            del_point(points[k][0], points[k][1], Links)
 
 def show_rules():
     '''
@@ -455,11 +458,13 @@ scale.pack(side=LEFT)
 mouse = Mouse()
 
 while True:
+    if Links == []:
+        Links = [[]]
     y_size = x_size = scale.get()
     window_settings = [window_width, window_height, x_size, y_size]
     if flag:
         try:
-            Re_calc_all()
+            Re_calc_all(Links)
             flag = False
         except ValueError:
             pass

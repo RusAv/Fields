@@ -848,6 +848,8 @@ def del_point(x, y):
             Links.pop(i)
             field.points.pop(i)
             n -= 1
+            if Links==[]:
+                Links=[[]]
             try:
                 Re_calc_all()
             except ValueError:

@@ -44,8 +44,8 @@ dt = 0.001
 x_size = 300
 y_size = 300
 paused = False
-window_width = 400
-window_height = 400
+window_width = 610
+window_height = 610
 max_points = 10
 min_scale = 300
 max_scale = 1200
@@ -137,7 +137,7 @@ def add_check():
 
 def rem_check():
     '''
-    Функция обрабатывает нажатие на кнопку "Режим удаления (связей)"
+    Функция обрабатывает нажатие на кнопку "Режим удаления (точек)"
     '''
     global add_clicks, rem_clicks, con_clicks, del_clicks
     global add_working, rem_working, con_working, del_working
@@ -203,7 +203,7 @@ def connect_check():
 
 def delete_check():
     '''
-    Функция обрабатывает нажатие на кнопку "Режим удаления (точек)"
+    Функция обрабатывает нажатие на кнопку "Режим разъединения"
     '''
     global add_clicks, rem_clicks, con_clicks, del_clicks
     global add_working, rem_working, con_working, del_working
@@ -220,7 +220,7 @@ def delete_check():
     elif (rem_working or con_working or add_working) and del_clicks % 2 == 1:
         del_working = True
         delete_button.config(text="Режим разъединения: выключить",
-                              bg = 'red')
+                              bg = 'blue')
         add_working = False
         add_clicks = 0
         add_button.config(text="Режим добавления точек: включить",
@@ -321,7 +321,7 @@ def remove_point(event):
     '''
     x = event.x
     y = event.y
-    for k in range (len(points)):
+    for k in range (len(points)-1, -1, -1):
         pointx = scale_x(points[k][0], window_settings)
         pointy = scale_y(points[k][1], window_settings)
         if (x - pointx)**2 + (y - pointy)**2 < sense**2 and event.widget == screen:
@@ -453,8 +453,10 @@ scale_label.pack(side=LEFT)
 scale.pack(side=LEFT)
 
 mouse = Mouse()
+points = []
 
 while True:
+    print(bonds, points)
     y_size = x_size = scale.get()
     window_settings = [window_width, window_height, x_size, y_size]
     if flag:

@@ -483,7 +483,7 @@ while True:
             create_gravit_vectors(vectors, window_settings, screen)
         else:
             vectors = Field[2]
-            create_magnet_squares(vectors, x_size, y_size, step, window_settings,
+            create_magnet_squares(vectors, step, window_settings,
                                   screen)
     else:  # Прорисовка только активного поля в работющем режиме
         vectors = Field[0]
@@ -492,7 +492,7 @@ while True:
         elif mode == 1:
             create_gravit_vectors(vectors, window_settings, screen)
         else:
-            create_magnet_squares(vectors, x_size, y_size, step, window_settings,
+            create_magnet_squares(vectors, step, window_settings,
                                   screen)
 
     create_points(mouse, con_working, rem_working, points,
